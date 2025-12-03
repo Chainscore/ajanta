@@ -139,8 +139,17 @@ def transpile_service(service_class: type) -> str:
     # Methods
     gen = CCodeGenerator(meta.name, state_vars=state_vars, structs=structs)
     
+    service_lower = meta.name.lower()
+    
     if meta.refine_method:
-        c_code.append('REFINE_FN {')
+        c_code.append(f'jam_refine_result_t {service_lower}_refine(')
+        c_code.append('    uint32_t item_index,')
+        c_code.append('    uint32_t service_id,')
+        c_code.append('    const uint8_t* payload,')
+        c_code.append('    uint64_t payload_len,')
+        c_code.append('    const uint8_t* work_package_hash')
+        c_code.append(') {')
+        
         method = meta.methods[meta.refine_method]
         source = inspect.getsource(method)
         tree = ast.parse(inspect.cleandoc(source))
@@ -150,15 +159,33 @@ def transpile_service(service_class: type) -> str:
         c_code.append('')
 
     if meta.accumulate_method:
-        c_code.append('ACCUMULATE_FN {')
-        # ...
+        c_code.append(f'void {service_lower}_accumulate(')
+        c_code.append('    uint32_t timeslot,')
+        c_code.append('    uint32_t service_id,')
+        c_code.append('    uint64_t num_inputs')
+        c_code.append(') {')
+        # ... (Accumulate body generation would go here if implemented)
         c_code.append('}')
         c_code.append('')
 
     if meta.on_transfer_method:
-        c_code.append('ON_TRANSFER_FN {')
-        # ...
+        c_code.append(f'void {service_lower}_on_transfer(')
+        c_code.append('    uint32_t sender,')
+        c_code.append('    uint32_t receiver,')
+        c_code.append('    uint64_t amount,')
+        c_code.append('    const uint8_t* memo,')
+        c_code.append('    uint64_t memo_len')
+        c_code.append(') {')
+        # ... (OnTransfer body generation would go here if implemented)
         c_code.append('}')
         c_code.append('')
 
+    # Exports
+    if meta.refine_method:
+        c_code.append(f'EXPORT_REFINE({service_lower}_refine)')
+    if meta.accumulate_method:
+        c_code.append(f'EXPORT_ACCUMULATE({service_lower}_accumulate)')
+    if meta.on_transfer_method:
+        c_code.append(f'EXPORT_ON_TRANSFER({service_lower}_on_transfer)')
+    
     return '\n'.join(c_code)

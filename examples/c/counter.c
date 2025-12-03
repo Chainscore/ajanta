@@ -51,7 +51,13 @@ enum {
 // Refine Entry Point - Automated!
 // =============================================================================
 
-REFINE_FN {
+jam_refine_result_t counter_refine(
+    uint32_t item_index,
+    uint32_t service_id,
+    const uint8_t* payload,
+    uint64_t payload_len,
+    const uint8_t* work_package_hash
+) {    
     static uint8_t result[16]; // Increased for struct return
 
     LOG_INFO_UINT("Initial counter", counter);
@@ -123,7 +129,7 @@ REFINE_FN {
 // Accumulate - Automated!
 // =============================================================================
 
-ACCUMULATE_FN {
+void counter_accumulate(uint32_t timeslot, uint32_t service_id, uint64_t num_inputs) {
     LOG_UINT("final_counter", counter);
 }
 
@@ -131,6 +137,11 @@ ACCUMULATE_FN {
 // On Transfer - Automated!
 // =============================================================================
 
-ON_TRANSFER_FN {
+void counter_on_transfer(uint32_t sender, uint32_t receiver, uint64_t amount, const uint8_t* memo, uint64_t memo_len) {
     // counter++;
 }
+
+
+EXPORT_REFINE(counter_refine)
+EXPORT_ACCUMULATE(counter_accumulate)
+EXPORT_ON_TRANSFER(counter_on_transfer)

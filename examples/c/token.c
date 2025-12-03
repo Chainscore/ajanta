@@ -8,8 +8,8 @@
  * - Global State: total_supply, owner
  */
 
-#include "../include/jam_sdk.c"
-#include "../include/jam_state_vars.h"
+#include "../../sdk/src/jam_sdk.c"
+#include "../../sdk/src/jam_state_vars.h"
 
 // =============================================================================
 // Types
@@ -50,7 +50,13 @@ enum {
 // Refine Entry Point
 // =============================================================================
 
-REFINE_FN {
+jam_refine_result_t token_refine(
+    uint32_t item_index,
+    uint32_t service_id,
+    const uint8_t* payload,
+    uint64_t payload_len,
+    const uint8_t* work_package_hash
+) {
     static uint8_t result[32];
     
     if (payload_len == 0) return error(0xFF);
@@ -160,7 +166,7 @@ REFINE_FN {
 // Accumulate
 // =============================================================================
 
-ACCUMULATE_FN {
+void token_accumulate(uint32_t timeslot, uint32_t service_id, uint64_t num_inputs) {
     // No-op
 }
 
@@ -168,6 +174,14 @@ ACCUMULATE_FN {
 // On Transfer
 // =============================================================================
 
-ON_TRANSFER_FN {
+void token_on_transfer(uint32_t sender, uint32_t receiver, uint64_t amount, const uint8_t* memo, uint64_t memo_len) {
     // No-op
 }
+
+// =============================================================================
+// Exports
+// =============================================================================
+
+EXPORT_REFINE(token_refine)
+EXPORT_ACCUMULATE(token_accumulate)
+EXPORT_ON_TRANSFER(token_on_transfer)

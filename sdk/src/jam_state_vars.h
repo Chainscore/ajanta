@@ -205,33 +205,15 @@ static inline int _mem_cmp(const void* a, const void* b, uint64_t n) {
 // =============================================================================
 
 /**
- * REFINE_FN - Define the refine entry point with automatic state management
+ * EXPORT_REFINE - Export the refine entry point with automatic state management
  * 
  * Usage:
- *   REFINE_FN {
- *       // ... your code ...
- *       // state is already loaded
- *       counter++;
- *       // state will be saved automatically on return
- *       return result;
+ *   jam_refine_result_t my_refine(uint32_t item_index, uint32_t service_id, ...) {
+ *       // ...
  *   }
- * 
- * Available arguments:
- *   uint32_t item_index
- *   uint32_t service_id
- *   const uint8_t* payload
- *   uint64_t payload_len
- *   const uint8_t* work_package_hash
+ *   EXPORT_REFINE(my_refine)
  */
-#define REFINE_FN \
-    static jam_refine_result_t _user_refine( \
-        uint32_t item_index, \
-        uint32_t service_id, \
-        const uint8_t* payload, \
-        uint64_t payload_len, \
-        const uint8_t* work_package_hash \
-    ); \
-    \
+#define EXPORT_REFINE(user_fn) \
     jam_refine_result_t jam_hook_refine( \
         uint32_t item_index, \
         uint32_t service_id, \
@@ -240,69 +222,29 @@ static inline int _mem_cmp(const void* a, const void* b, uint64_t n) {
         const uint8_t* work_package_hash \
     ) { \
         state_load(); \
-        jam_refine_result_t res = _user_refine(item_index, service_id, payload, payload_len, work_package_hash); \
+        jam_refine_result_t res = user_fn(item_index, service_id, payload, payload_len, work_package_hash); \
         state_save(); \
         return res; \
-    } \
-    \
-    static jam_refine_result_t _user_refine( \
-        uint32_t item_index, \
-        uint32_t service_id, \
-        const uint8_t* payload, \
-        uint64_t payload_len, \
-        const uint8_t* work_package_hash \
-    )
+    }
 
 /**
- * ACCUMULATE_FN - Define the accumulate entry point with automatic state management
- * 
- * Available arguments:
- *   uint32_t timeslot
- *   uint32_t service_id
- *   uint64_t num_inputs
+ * EXPORT_ACCUMULATE - Export the accumulate entry point with automatic state management
  */
-#define ACCUMULATE_FN \
-    static void _user_accumulate( \
-        uint32_t timeslot, \
-        uint32_t service_id, \
-        uint64_t num_inputs \
-    ); \
-    \
+#define EXPORT_ACCUMULATE(user_fn) \
     void jam_hook_accumulate( \
         uint32_t timeslot, \
         uint32_t service_id, \
         uint64_t num_inputs \
     ) { \
         state_load(); \
-        _user_accumulate(timeslot, service_id, num_inputs); \
+        user_fn(timeslot, service_id, num_inputs); \
         state_save(); \
-    } \
-    \
-    static void _user_accumulate( \
-        uint32_t timeslot, \
-        uint32_t service_id, \
-        uint64_t num_inputs \
-    )
+    }
 
 /**
- * ON_TRANSFER_FN - Define the on_transfer entry point with automatic state management
- * 
- * Available arguments:
- *   uint32_t sender
- *   uint32_t receiver
- *   uint64_t amount
- *   const uint8_t* memo
- *   uint64_t memo_len
+ * EXPORT_ON_TRANSFER - Export the on_transfer entry point with automatic state management
  */
-#define ON_TRANSFER_FN \
-    static void _user_on_transfer( \
-        uint32_t sender, \
-        uint32_t receiver, \
-        uint64_t amount, \
-        const uint8_t* memo, \
-        uint64_t memo_len \
-    ); \
-    \
+#define EXPORT_ON_TRANSFER(user_fn) \
     void jam_hook_on_transfer( \
         uint32_t sender, \
         uint32_t receiver, \
@@ -311,17 +253,9 @@ static inline int _mem_cmp(const void* a, const void* b, uint64_t n) {
         uint64_t memo_len \
     ) { \
         state_load(); \
-        _user_on_transfer(sender, receiver, amount, memo, memo_len); \
+        user_fn(sender, receiver, amount, memo, memo_len); \
         state_save(); \
-    } \
-    \
-    static void _user_on_transfer( \
-        uint32_t sender, \
-        uint32_t receiver, \
-        uint64_t amount, \
-        const uint8_t* memo, \
-        uint64_t memo_len \
-    )
+    }
 
 #ifdef __cplusplus
 }
