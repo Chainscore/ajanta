@@ -1,7 +1,7 @@
 from tsrkit_types import TypedArray, structure, Uint
 
 from .crypto import Hash, OpaqueHash
-from jam.utils.constants import EPOCH_LENGTH
+from playground.utils.constants import EPOCH_LENGTH
 
 TicketId = OpaqueHash
 TicketAttempt = Uint[8]

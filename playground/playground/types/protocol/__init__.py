@@ -1,4 +1,4 @@
-from jam.types.protocol.core import (
+from .core import (
     TimeSlot,
     ValidatorIndex,
     CoreIndex,
@@ -16,14 +16,14 @@ from jam.types.protocol.core import (
 )
 
 
-from jam.types.protocol.validators import (
+from .validators import (
     ValidatorMetadata,
     ValidatorData,
     ValidatorsData,
     IPAddress,
 )
 
-from jam.types.protocol.crypto import (
+from .crypto import (
     BandersnatchPublic,
     BandersnatchVrfSignature,
     BandersnatchRingVrfSignature,
@@ -40,7 +40,7 @@ from jam.types.protocol.crypto import (
     Hash,
 )
 
-from jam.types.protocol.merkle import MMR, OptionHash
+from .merkle import MMR, OptionHash
 
 
 __all__ = [

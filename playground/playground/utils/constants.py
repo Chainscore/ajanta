@@ -3,7 +3,7 @@
 from tsrkit_types import Enum
 
 from datetime import datetime, timezone
-# from jam.utils.chainspec import chain_config
+# from playground.utils.chainspec import chain_config
 
 # Mock chain_config
 class ChainConfig:

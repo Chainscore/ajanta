@@ -5,10 +5,10 @@ from jam.execution.invocations.functions.general_fns import GeneralFunctions
 from jam.execution.invocations.protocol import InvocationProtocol
 from jam.execution.utils import decode_code_hash
 from jam.state.accounts import DeltaView
-from jam.types.state.accumulation.types import DeferredTransfers
-from jam.types.state.delta import AccountData
-from jam.types.protocol.core import Gas, ProgramCounter, ServiceId, TimeSlot
-from jam.utils.constants import W_C
+from playground.types.state.accumulation.types import DeferredTransfers
+from playground.types.state.delta import AccountData
+from playground.types.protocol.core import Gas, ProgramCounter, ServiceId, TimeSlot
+from playground.utils.constants import W_C
 
 
 class PsiT(InvocationProtocol):

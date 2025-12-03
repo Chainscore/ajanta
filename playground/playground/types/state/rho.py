@@ -1,9 +1,9 @@
 from tsrkit_types.sequences import TypedArray
 from tsrkit_types.struct import structure
 from tsrkit_types.option import Option
-from jam.types.protocol.core import TimeSlot
-from jam.types.work import WorkReport, WorkReports
-from jam.utils.constants import CORE_COUNT
+from playground.types.protocol.core import TimeSlot
+from playground.types.work import WorkReport, WorkReports
+from playground.utils.constants import CORE_COUNT
 
 
 @structure

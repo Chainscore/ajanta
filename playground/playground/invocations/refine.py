@@ -14,10 +14,10 @@ from tsrkit_pvm import OUT_OF_GAS, PANIC
 from jam.execution.utils import decode_code_hash
 from tsrkit_types.integers import Uint
 
-from jam.types.work import WorkExecResult, Segments, WorkPackage
-from jam.types.protocol.core import ProgramCounter, Gas
-from jam.types.protocol.crypto import OpaqueHash, Hash
-from jam.utils.constants import REFINE_GAS
+from playground.types.work import WorkExecResult, Segments, WorkPackage
+from playground.types.protocol.core import ProgramCounter, Gas
+from playground.types.protocol.crypto import OpaqueHash, Hash
+from playground.utils.constants import REFINE_GAS
 
 
 class PsiR(InvocationProtocol):

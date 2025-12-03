@@ -1,6 +1,6 @@
 from tsrkit_types.sequences import TypedArray, TypedVector
-from jam.types.protocol.crypto import OpaqueHash
-from jam.utils.constants import CORE_COUNT, MAX_AUTH_QUEUE_ITEMS
+from playground.types.protocol.crypto import OpaqueHash
+from playground.utils.constants import CORE_COUNT, MAX_AUTH_QUEUE_ITEMS
 
 AuthorizerHash = OpaqueHash
 

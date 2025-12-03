@@ -1,5 +1,4 @@
 from tsrkit_types.bytes import Bytes
-# from Crypto.Hash import keccak
 from sha3 import keccak_256
 
 # Public key types

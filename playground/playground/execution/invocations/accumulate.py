@@ -1,7 +1,7 @@
 from typing import Any, Dict, Tuple
 from tsrkit_types import U32
 from jam.state.partial import GhostPartial
-from jam.types.state.accumulation.types import (
+from playground.types.state.accumulation.types import (
     DeferredTransfers,
     OperandTuples,
     AccuContextX,
@@ -13,15 +13,15 @@ from jam.execution.invocations.functions.general_fns import GeneralFunctions
 from jam.execution.invocations.protocol import InvocationInfo, InvocationProtocol
 from tsrkit_types.null import Null
 from tsrkit_types.integers import Uint
-from jam.types.protocol.core import Gas, ServiceId, TimeSlot
-from jam.types.protocol.crypto import Hash, OpaqueHash
-from jam.types.protocol.merkle import OptionHash
+from playground.types.protocol.core import Gas, ServiceId, TimeSlot
+from playground.types.protocol.crypto import Hash, OpaqueHash
+from playground.types.protocol.merkle import OptionHash
 from jam.execution.invocations.functions.accumulate_fns import (
     AccumulateFunctions,
     check,
 )
 from tsrkit_pvm import ExecutionStatus
-from jam.utils.constants import MAX_SERVICE_CODE_SIZE
+from playground.utils.constants import MAX_SERVICE_CODE_SIZE
 
 
 class PsiA(InvocationProtocol):

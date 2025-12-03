@@ -1,17 +1,17 @@
 from jam.state.accounts import AccountDataView, DeltaView
 from jam.state.partial import GhostPartial
-from jam.types.state.accumulation.types import (
+from playground.types.state.accumulation.types import (
     AccumulationContext,
     DeferredTransfer,
 )
 from tsrkit_types import U32, U64, Bytes
-from jam.types.protocol.validators import ValidatorData
+from playground.types.protocol.validators import ValidatorData
 from jam.log_setup import pvm_logger as logger
 from jam.execution.invocations.functions.protocol import (
     InvocationFunctions as INVF,
 )
-from jam.types.state.iota import Iota
-from jam.types.state.phi import AuthorizationQueue, AuthorizerHash
+from playground.types.state.iota import Iota
+from playground.types.state.phi import AuthorizationQueue, AuthorizerHash
 from tsrkit_pvm import (
     Memory,
     CONTINUE,
@@ -20,11 +20,11 @@ from tsrkit_pvm import (
     PvmError,
     ExecutionStatus,
 )
-from jam.types import Timestamps
-from jam.types.protocol.crypto import Hash, OpaqueHash
-from jam.types.protocol.merkle import OptionHash
-from jam.types.state.chi import Chi
-from jam.types.state.delta import (
+from playground.types import Timestamps
+from playground.types.protocol.crypto import Hash, OpaqueHash
+from playground.types.protocol.merkle import OptionHash
+from playground.types.state.chi import Chi
+from playground.types.state.delta import (
     AccountData,
     AccountLookup,
     AccountMetadata,
@@ -36,8 +36,8 @@ from jam.types.state.delta import (
     LookupTable,
     ServiceCodeHash,
 )
-from jam.types.protocol.core import Balance, BlobLength, Gas, ServiceId, TimeSlot
-from jam.utils.constants import (
+from playground.types.protocol.core import Balance, BlobLength, Gas, ServiceId, TimeSlot
+from playground.utils.constants import (
     ADDITIONAL_BALANCE_PER_ITEM,
     ADDITIONAL_BALANCE_PER_OCTET,
     BASIC_MINIMUM_BALANCE,

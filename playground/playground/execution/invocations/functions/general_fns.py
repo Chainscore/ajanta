@@ -323,9 +323,6 @@ class GeneralFunctions(INVF):
         accounts: Delta,
     ):
         service_key = registers[7]
-        key_offset = registers[8]
-        key_size = registers[9]
-        output_offset = registers[10]
 
         if service_key == 2**64 - 1:
             service_key = service_index
@@ -358,9 +355,11 @@ class GeneralFunctions(INVF):
             start = min(int(registers[11]), len(value))
             length = min(int(registers[12]), len(value) - start)
 
+            print("o", o, length, memory.is_accessible(o, length, Accessibility.READ))
+
             if not memory.is_accessible(o, length, Accessibility.WRITE):
                 logger.error(
-                    "Host call read: memory not accessible for output",
+                    "Host call write: memory not accessible for output",
                     extra={"output_offset": o, "required_size": length},
                 )
                 raise PvmError(PANIC)
@@ -402,7 +401,7 @@ class GeneralFunctions(INVF):
         if vz == 0:
             a.__delitem__(k)
             logger.debug("Host call write: storage key deleted", extra={"storage_key": k.hex()[:16] + "..."})
-        elif memory.is_accessible(vo, vz, Accessibility.WRITE):
+        elif memory.is_accessible(vo, vz, Accessibility.READ):
             pre_data = a.get(k)  # Use get() to avoid KeyError
             a[k] = Bytes(memory.read(vo, vz))
             if service_data.service.t > service_data.service.balance:

@@ -4,13 +4,14 @@ version = "0.1.0"
 description = "Playground for JAM SDK"
 requires-python = ">=3.11,<3.13"
 dependencies = [
+    "tsrkit-types",
     "tsrkit-pvm",
-    "jam-types",
     "pytest",
     "tsrkit-asm",
+    "safe-pysha3>=1.0.5",
 ]
 
 [tool.uv.sources]
-tsrkit-pvm = { path = "../../../tsrkit-pvm", editable = true }
-jam-types = { path = "../../../jam-types-py", editable = true }
-tsrkit-asm = { path = "../../../tsrkit-asm", editable = true }
+tsrkit-pvm = { path = "deps/tsrkit-pvm", editable = true }
+tsrkit-types = { path = "deps/tsrkit-types", editable = true }
+tsrkit-asm = { path = "deps/tsrkit-asm", editable = true }

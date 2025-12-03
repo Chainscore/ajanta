@@ -15,7 +15,7 @@ def test_refine(caplog):
     import logging
     caplog.set_level(logging.DEBUG)
     
-    code = open(os.path.join(os.path.dirname(__file__), "../../service.pvm"), "rb").read()
+    code = open(os.path.join(os.path.dirname(__file__), "../../build/service.pvm"), "rb").read()
 
     # Prepare arguments
     payload = b'Kartik'

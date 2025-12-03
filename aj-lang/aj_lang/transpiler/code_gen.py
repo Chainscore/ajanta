@@ -66,6 +66,12 @@ class CCodeGenerator(ast.NodeVisitor):
             # Special case for arrays (strings/bytes)
             if c_type == 'char*' or c_type == 'uint8_t*':
                  self.emit(f"{c_type} {name} = NULL;")
+            elif c_type.startswith('uint8_t[') and c_type.endswith(']'):
+                 # Stack allocated array: uint8_t name[N] = {0};
+                 # c_type is "uint8_t[N]"
+                 base_type, size_part = c_type.split('[', 1)
+                 size = size_part[:-1] # Remove trailing ']'
+                 self.emit(f"{base_type} {name}[{size}] = {{0}};")
             elif c_type in self.structs:
                  self.emit(f"{c_type} {name} = {{0}};")
             else:
@@ -80,6 +86,13 @@ class CCodeGenerator(ast.NodeVisitor):
             raise TranspileError("Multiple assignment not supported", node)
         
         target = node.targets[0]
+        
+        # Special case: bytearray allocation
+        # buf = bytearray(N) -> already handled in declaration (zero init)
+        if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == 'bytearray':
+            # Skip assignment, as it's handled in declaration
+            return
+
         value_code = self.visit_expr(node.value)
         
         if isinstance(target, ast.Name):
@@ -89,7 +102,14 @@ class CCodeGenerator(ast.NodeVisitor):
                 self.emit(f"{var_name} = {value_code};")
             else:
                 # Local variable (already declared)
-                self.emit(f"{var_name} = {value_code};")
+                # Check if it's an array type (stack allocated)
+                if var_name in self.local_vars and '[' in self.local_vars[var_name]:
+                     # Array assignment not supported directly, usually handled by special cases (like bytearray above)
+                     # or memcpy if we supported it.
+                     # For now, if we get here, it's likely an error or unsupported.
+                     pass 
+                else:
+                    self.emit(f"{var_name} = {value_code};")
                 
         elif isinstance(target, ast.Subscript):
             # Mapping assignment: balances[to] = val -> balances_set(to, val)
@@ -405,6 +425,11 @@ class CCodeGenerator(ast.NodeVisitor):
                 return self.get_c_type(info['val_type'])
 
         if isinstance(node, ast.Call):
+            # Special case: bytearray(N)
+            if isinstance(node.func, ast.Name) and node.func.id == 'bytearray':
+                if len(node.args) == 1 and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, int):
+                    return f"uint8_t[{node.args[0].value}]"
+
             # Look up intrinsic return type
             func_name = ""
             class_name = None

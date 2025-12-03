@@ -7,9 +7,9 @@ from tsrkit_types.struct import structure
 from tsrkit_types.option import Option
 
 from jam.network.protocols.ce_144 import Announcement
-from jam.types.protocol.crypto import HeaderHash, Hash
-from jam.types.protocol.core import ValidatorIndex
-from jam.types.work.report import WorkReport, WorkReportHash, WorkReports
+from playground.types.protocol.crypto import HeaderHash, Hash
+from playground.types.protocol.core import ValidatorIndex
+from playground.types.work.report import WorkReport, WorkReportHash, WorkReports
 
 SignatureList=TypedVector[Bytes]
 ValidatorList=TypedVector[ValidatorIndex]

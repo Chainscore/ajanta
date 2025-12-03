@@ -1,7 +1,7 @@
 from tsrkit_types import TypedBoundedVector
 from tsrkit_types.sequences import TypedArray, TypedVector
-from jam.types.protocol.crypto import OpaqueHash
-from jam.utils.constants import CORE_COUNT, O
+from playground.types.protocol.crypto import OpaqueHash
+from playground.utils.constants import CORE_COUNT, O
 
 AuthorizerHash = OpaqueHash
 

@@ -1,6 +1,6 @@
 from tsrkit_types.sequences import TypedArray
-from jam.types.work import WorkDependencies
-from jam.utils.constants import EPOCH_LENGTH
+from playground.types.work import WorkDependencies
+from playground.utils.constants import EPOCH_LENGTH
 
 
 class Xi(TypedArray[WorkDependencies, EPOCH_LENGTH]):

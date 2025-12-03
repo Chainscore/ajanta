@@ -1,10 +1,10 @@
 from jam.execution.invocations.functions.general_fns import GeneralFunctions
 from jam.execution.invocations.arg_invoke import PsiM
 from jam.execution.invocations.protocol import InvocationProtocol
-from jam.types.protocol.core import CoreIndex, ProgramCounter
-from jam.types.protocol.crypto import OpaqueHash
-from jam.types.work import WorkPackage
-from jam.utils.constants import IS_AUTHORIZED_GAS, MAX_AUTH_CODE_SIZE
+from playground.types.protocol.core import CoreIndex, ProgramCounter
+from playground.types.protocol.crypto import OpaqueHash
+from playground.types.work import WorkPackage
+from playground.utils.constants import IS_AUTHORIZED_GAS, MAX_AUTH_CODE_SIZE
 from tsrkit_pvm import HostStatus
 
 

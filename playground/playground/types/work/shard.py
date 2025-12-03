@@ -3,9 +3,9 @@ from typing import List, Tuple
 
 from tsrkit_types import Uint, Bytes, TypedVector, structure, Dictionary, TypedArray
 
-from jam.utils.chainspec import chain_config
-from jam.types.protocol.crypto import OpaqueHash
-from jam.types.work.manifest import SegmentIndex
+from playground.utils.chainspec import chain_config
+from playground.types.protocol.crypto import OpaqueHash
+from playground.types.work.manifest import SegmentIndex
 
 ShardIndex = Uint[16]
 

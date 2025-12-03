@@ -4,8 +4,8 @@ from typing import Union
 from tsrkit_types.sequences import TypedArray
 from tsrkit_types.integers import Uint, U8
 from tsrkit_types.struct import structure
-from jam.types.protocol.crypto import BandersnatchPublic, Ed25519Public, BlsPublic
-from jam.utils.constants import VALIDATOR_COUNT
+from .crypto import BandersnatchPublic, Ed25519Public, BlsPublic
+from ...utils.constants import VALIDATOR_COUNT
 from tsrkit_types.bytes import Bytes
 
 

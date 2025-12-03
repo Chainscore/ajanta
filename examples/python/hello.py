@@ -24,8 +24,7 @@ class HelloService:
         value = b"myvalue"
         set_storage(key, 5, value, 7)
         
-        # Read it back into a buffer
-        buf = b"0000000"  # 7 byte buffer
+        buf = bytearray(7)
         read_len = get_storage(0, key, 5, buf, 0, 7)
         
         # Log the read value (the buffer now contains "myvalue")

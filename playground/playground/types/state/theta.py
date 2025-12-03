@@ -1,7 +1,7 @@
 from tsrkit_types import structure, TypedVector
 
-from jam.types.protocol.core import ServiceId
-from jam.types.protocol.crypto import OpaqueHash
+from playground.types.protocol.core import ServiceId
+from playground.types.protocol.crypto import OpaqueHash
 
 @structure
 class Commitment:

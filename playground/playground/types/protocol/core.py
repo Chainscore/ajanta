@@ -1,6 +1,6 @@
-from jam.types.protocol.validators import ValidatorsData
+from .validators import ValidatorsData
 from tsrkit_types.integers import Uint
-from jam.types.protocol.crypto import OpaqueHash
+from .crypto import OpaqueHash
 
 # Simple type aliases
 TimeSlot = Uint[32]
