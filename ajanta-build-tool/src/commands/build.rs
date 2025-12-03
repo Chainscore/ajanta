@@ -27,12 +27,24 @@ pub struct Args {
 
 pub fn run(args: Args) -> Result<()> {
     /* -------------------------------------------------------------------------- */
-    /*                                Compile C Source                            */
+    /*                                Compile Source                              */
     /* -------------------------------------------------------------------------- */
     let tempdir = tempfile::tempdir().context("create temp directory")?;
 
+    let extension = args.source.extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("c");
+
+    let is_cpp = matches!(extension, "cpp" | "cc" | "cxx");
+
+    let compiler = if args.compiler == "riscv64-elf-gcc" && is_cpp {
+        "riscv64-elf-g++".to_string()
+    } else {
+        args.compiler.clone()
+    };
+
     let obj_path = tempdir.path().join("source.o");
-    let mut cmd = Command::new(&args.compiler);
+    let mut cmd = Command::new(&compiler);
     cmd.arg("-march=rv64imac")
         .arg("-mabi=lp64")
         .arg("-mno-relax")
@@ -44,6 +56,22 @@ pub fn run(args: Args) -> Result<()> {
         .arg("-o")
         .arg(&obj_path);
 
+    if is_cpp {
+        cmd.arg("-fno-exceptions")
+           .arg("-fno-rtti")
+           .arg("-fno-pic")
+           .arg("-ffixed-s2")
+           .arg("-ffixed-s3")
+           .arg("-ffixed-s4")
+           .arg("-ffixed-s5")
+           .arg("-ffixed-s6")
+           .arg("-ffixed-s7")
+           .arg("-ffixed-s8")
+           .arg("-ffixed-s9")
+           .arg("-ffixed-s10")
+           .arg("-ffixed-s11");
+    }
+
     for flag in &args.cflags {
         cmd.arg(flag);
     }
@@ -52,7 +80,7 @@ pub fn run(args: Args) -> Result<()> {
     let include_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/src");
     cmd.arg("-I").arg(&include_path);
 
-    ajanta_build_tool::run_command(&mut cmd, "compile C source")?;
+    ajanta_build_tool::run_command(&mut cmd, "compile source")?;
 
     /* -------------------------------------------------------------------------- */
     /*                                Compile Stubs                               */
