@@ -1,7 +1,7 @@
 // Runtime stubs for JAM PVM
 #include <stdint.h>
 #include <stddef.h>
-#include "../../src/ajanta/include/polkavm_guest.h"
+#include "../src/polkavm_guest.h"
 
 POLKAVM_IMPORT_WITH_INDEX(0, uint64_t, _gas);
 uint64_t gas(void) { return _gas(); }

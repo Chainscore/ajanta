@@ -11,12 +11,15 @@ members = [
 [[package]]
 name = "aj-lang"
 version = "0.1.0"
-source = { virtual = "aj-lang" }
+source = { editable = "aj-lang" }
 
 [[package]]
 name = "ajanta"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "aj-lang" },
+]
 
 [package.optional-dependencies]
 dev = [
@@ -27,6 +30,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aj-lang", editable = "aj-lang" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.21" },

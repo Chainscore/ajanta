@@ -34,9 +34,9 @@ pub fn run(args: Args) -> Result<()> {
     /* -------------------------------------------------------------------------- */
     /*                                Compile Stubs                               */
     /* -------------------------------------------------------------------------- */
-    let entry_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("stubs/entry.S");
-    let runtime_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("stubs/runtime.c");
-    let exports_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("stubs/exports.S");
+    let entry_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/stubs/entry.S");
+    let runtime_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/stubs/runtime.c");
+    let exports_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/stubs/exports.S");
 
     let obj_path = tempdir.path().join("linked.elf");
     let mut cmd = Command::new(&args.compiler);
@@ -60,7 +60,7 @@ pub fn run(args: Args) -> Result<()> {
     let include_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("include");
     cmd.arg("-I").arg(&include_path);
 
-    jamc::run_command(&mut cmd, "compile C source")?;
+    ajanta_build_tool::run_command(&mut cmd, "compile C source")?;
 
     let elf_path = tempdir.path().join("linked.elf");
     // let elf_data = std::fs::read("/home/kartik-chainscore/JAM/jamc/hello.elf").context("read linked ELF")?;

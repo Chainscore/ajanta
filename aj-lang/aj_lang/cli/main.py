@@ -54,7 +54,7 @@ def cmd_build(args):
     # Output paths
     # Determine project root (assuming we are running from project root or similar)
     # For now, let's create a 'build' directory in the current working directory
-    build_dir = Path('build')
+    build_dir = Path(__file__).parent.parent.parent.parent / 'build'
     build_dir.mkdir(exist_ok=True)
     
     output_path = Path(args.output)

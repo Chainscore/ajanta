@@ -1,0 +1,1 @@
+"""Ajanta CLI module."""

@@ -76,8 +76,8 @@ def transpile_service(service_class: type) -> str:
     # 3. Generate C Code
     c_code = []
     c_code.append('// Generated from Python')
-    c_code.append('#include "../../sdk/include/jam_sdk.c"')
-    c_code.append('#include "../../sdk/include/jam_state_vars.h"')
+    c_code.append('#include <jam_sdk.c>')
+    c_code.append('#include <jam_state_vars.h>')
     c_code.append('')
     c_code.append('static uint8_t _ret_buf[256];')
     c_code.append('jam_refine_result_t ok_u64(uint64_t val) {')

@@ -15,6 +15,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ajanta-build-tool"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "jam-program-blob-common",
+ "polkavm-common",
+ "polkavm-disassembler",
+ "polkavm-linker",
+ "tempfile",
+]
+
+[[package]]
 name = "anstream"
 version = "0.6.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -393,19 +406,6 @@ checksum = "4b39d525b967602809d15c5e8555ed92276aaa0be27917ed7a3190cfd5217a96"
 dependencies = [
  "jam-codec",
  "polkavm",
-]
-
-[[package]]
-name = "jamc"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "jam-program-blob-common",
- "polkavm-common",
- "polkavm-disassembler",
- "polkavm-linker",
- "tempfile",
 ]
 
 [[package]]

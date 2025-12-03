@@ -48,20 +48,20 @@ pub fn run(args: Args) -> Result<()> {
         cmd.arg(flag);
     }
 
-    // Add include path for our header
-    let include_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/include");
+    // Add include path for SDK headers
+    let include_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/src");
     cmd.arg("-I").arg(&include_path);
 
-    jamc::run_command(&mut cmd, "compile C source")?;
+    ajanta_build_tool::run_command(&mut cmd, "compile C source")?;
 
     /* -------------------------------------------------------------------------- */
     /*                                Compile Stubs                               */
     /* -------------------------------------------------------------------------- */
-    let entry_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("stubs/entry.S");
+    let entry_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/stubs/entry.S");
     let entry_obj = tempdir.path().join("entry.o");
-    let runtime_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("stubs/runtime.c");
+    let runtime_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/stubs/runtime.c");
     let runtime_obj = tempdir.path().join("runtime.o");
-    let exports_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("stubs/exports.S");
+    let exports_stub = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../sdk/stubs/exports.S");
     let exports_obj = tempdir.path().join("exports.o");
 
     // 1. Compile entry stub
@@ -74,7 +74,7 @@ pub fn run(args: Args) -> Result<()> {
         .arg(&entry_stub)
         .arg("-o")
         .arg(&entry_obj);
-    jamc::run_command(&mut stub_cmd, "compile entry stub")?;
+    ajanta_build_tool::run_command(&mut stub_cmd, "compile entry stub")?;
 
     // 2. Compile runtime stub
     let mut runtime_cmd = Command::new(&args.compiler);
@@ -89,7 +89,7 @@ pub fn run(args: Args) -> Result<()> {
         .arg(&runtime_stub)
         .arg("-o")
         .arg(&runtime_obj);
-    jamc::run_command(&mut runtime_cmd, "compile runtime stub")?;
+    ajanta_build_tool::run_command(&mut runtime_cmd, "compile runtime stub")?;
 
     // 3. Compile exports stub
     let mut exports_cmd = Command::new(&args.compiler);
@@ -101,7 +101,7 @@ pub fn run(args: Args) -> Result<()> {
         .arg(&exports_stub)
         .arg("-o")
         .arg(&exports_obj);
-    jamc::run_command(&mut exports_cmd, "compile exports stub")?;
+    ajanta_build_tool::run_command(&mut exports_cmd, "compile exports stub")?;
 
     /* -------------------------------------------------------------------------- */
     /*                                 Link ELF                                   */
@@ -115,7 +115,7 @@ pub fn run(args: Args) -> Result<()> {
         .arg(&exports_obj)
         .arg("-o")
         .arg(tempdir.path().join("linked.elf"));
-    jamc::run_command(&mut link_cmd, "link ELF")?;
+    ajanta_build_tool::run_command(&mut link_cmd, "link ELF")?;
 
     let elf_path = tempdir.path().join("linked.elf");
     // let elf_data = std::fs::read("/home/kartik-chainscore/JAM/jamc/hello.elf").context("read linked ELF")?;
@@ -149,24 +149,11 @@ pub fn run(args: Args) -> Result<()> {
     // Write PVM file
     std::fs::write(&args.output, blob).context("write .pvm output")?;
 
-    // write jam file for debugging
-    let stem = Path::new(&args.output)
-        .file_stem()
-        .map(|s| s.to_string_lossy().into_owned())
-        .unwrap_or_default();
-
-    let debug_file_path = format!("{}.debug.pvm", stem);
-    
-    std::fs::write(&debug_file_path, pvm).context("write debug output")?;
-
     println!(
-        "Successfully built {} -> {} & {}",
+        "Successfully built {} -> {}",
         args.source.display(),
-        args.output.display(),
-        debug_file_path
+        args.output.display()
     );
-
-    // Temp dir will be automatically cleaned up
 
     Ok(())
 } 
