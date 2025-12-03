@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+.Python/
+env/
+venv/
+pip-log.txt
+pip-delete-this-arg.txt
+*.egg-info/
+.coverage
+.pytest_cache/
+dist/
+build/
+
+# Rust
+target/
+*.d
+*.o
+*.rlib
+*.so
+*.dylib
+*.dll
+*.profraw
+*.profdata
+*.gcno
+*.gcda
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+
+polkavm
+target
+*.pvm

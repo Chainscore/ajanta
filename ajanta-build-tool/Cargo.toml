@@ -1,0 +1,23 @@
+[package]
+name = "ajanta-build-tool"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "JAM C SDK build tool"
+authors = [
+    "Prasad <prasad@chainscore.finance>",
+    "Chainscore Labs <hello@chainscore.finance>",
+]
+repository = "https://github.com/chainscore/ajanta"
+
+[[bin]]
+name = "ajanta-build-tool"
+path = "src/main.rs"
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+anyhow = "1.0"
+polkavm-linker = "0.29.0"
+polkavm-disassembler = "0.29.0"
+polkavm-common = { version = "0.29.0", features = ["std"] }
+tempfile = "3"
+jam-program-blob-common = "0.1.26"

@@ -1,0 +1,137 @@
+from typing import Tuple
+
+from tsrkit_types import Bytes, Null
+import time 
+from playground.execution.invocations.functions.general_fns import GeneralFunctions
+from playground.execution.invocations.arg_invoke import PsiM
+from playground.execution.invocations.functions.refine_fns import (
+    RefineFunctions,
+    RefineContext,
+    RefinementMap,
+)
+from playground.execution.invocations.protocol import InvocationProtocol
+from tsrkit_pvm import OUT_OF_GAS, PANIC
+from playground.execution.utils import decode_code_hash
+from tsrkit_types.integers import Uint
+
+from playground.types.work import WorkExecResult, Segments, WorkPackage
+from playground.types.protocol.core import ProgramCounter, Gas
+from playground.types.protocol.crypto import OpaqueHash, Hash
+from playground.utils.constants import REFINE_GAS
+
+
+class PsiR(InvocationProtocol):
+    def __init__(
+        self,
+        item_index: int,
+        p: WorkPackage,
+        auth_trace: bytes,
+        i_segments: list[list[bytes]],
+        e_offset: int,
+    ):
+        self.item_index = Uint[16](item_index)
+        self.work_package = p
+        self.auth_trace = auth_trace
+        self.i_segments = i_segments
+        self.e_offset = e_offset
+        self.table = self.build_table()
+
+    @property
+    def wi(self):
+        return self.work_package.items[self.item_index]
+
+
+    def build_table(self):
+        from playground.types.state.state import state
+        from playground.types.storage.item_extrinsics import ItemExtrinsics
+        from playground.settings import settings
+
+        # Get service data for storage operations
+        service_data = state.delta.get(self.wi.service)
+
+        return {
+            0: (GeneralFunctions, {}),
+            1: (
+                GeneralFunctions,
+                {
+                    "package": self.work_package,
+                    "entropy": OpaqueHash([0] * 32),
+                    "trace": self.auth_trace,
+                    "item_index": self.item_index,
+                    "import_segments": self.i_segments,
+                    "extrinsics": ItemExtrinsics(settings.main_db).get_all(self.work_package),
+                    "o": None,
+                    "t": None,
+                },
+            ),
+            3: (
+                GeneralFunctions,
+                {
+                    "service_data": service_data,
+                    "service_index": self.wi.service,
+                    "accounts": state.delta,
+                },
+            ),  # read storage
+            4: (
+                GeneralFunctions,
+                {
+                    "service_data": service_data,
+                    "service_index": self.wi.service,
+                },
+            ),  # write storage
+            6: (
+                RefineFunctions,
+                {
+                    "service_id": self.wi.service,
+                    "delta": state.delta,
+                    "timeslot": self.work_package.context.lookup_anchor_slot,
+                },
+            ), # Historial lookup 
+            7: (RefineFunctions, {"export_segment_offset": self.e_offset}),
+            8: (RefineFunctions, {}),
+            9: (RefineFunctions, {}),
+            10: (RefineFunctions, {}),
+            11: (RefineFunctions, {}),
+            12: (RefineFunctions, {}),
+            13: (RefineFunctions, {}),
+            # TODO: Add core_index [we'll probably be storing core_index in node info]
+            100: (
+                GeneralFunctions,
+                {"core_index": 0, "service_id": self.wi.service},
+            ),  # log
+        }
+
+    def execute(self) -> Tuple[WorkExecResult, Segments, Gas]:
+        from playground.types.state.state import state
+
+        _, pc = decode_code_hash(
+            state.delta[self.wi.service].historical_lookup(
+                self.work_package.context.lookup_anchor_slot, self.wi.code_hash
+            )
+        )
+
+        args = (
+            Uint(self.item_index).encode()
+            + Uint(self.wi.service).encode()
+            + self.wi.payload.encode()
+            + bytes(Hash.blake2b(self.work_package.encode()))
+        )
+        
+        start = time.time()
+        u, r, context = PsiM.execute(
+            pc,
+            ProgramCounter(0),
+            REFINE_GAS,
+            args,
+            self.dispatch,
+            RefineContext(m=RefinementMap({}), e=Segments([])),
+        )
+        print(f"Refinement completed! \nTime Taken \t {(1000 * (time.time() - start)):.2f} ms\nGas consumed \t {int(u)}\n ")
+
+        if r == PANIC:
+            return WorkExecResult(Null, key="panic"), Segments([]), Gas(u)
+
+        elif r == OUT_OF_GAS:
+            return WorkExecResult(Null, key="out_of_gas"), Segments([]), Gas(u)
+
+        return WorkExecResult(Bytes(r), key="ok"), Segments(context.e), Gas(u)
