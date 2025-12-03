@@ -1,0 +1,12 @@
+[submodule "playground/tests/deps/tsrkit-pvm"]
+	path = playground/tests/deps/tsrkit-pvm
+	url = https://github.com/chainscore/tsrkit-pvm.git
+	branch = feat/mypyc
+[submodule "playground/tests/deps/tsrkit-asm"]
+	path = playground/tests/deps/tsrkit-asm
+	url = https://github.com/chainscore/tsrkit-asm.git
+	branch = main
+[submodule "playground/tests/deps/tsrkit-types"]
+	path = playground/tests/deps/tsrkit-types
+	url = https://github.com/chainscore/tsrkit-types.git
+	branch = main
