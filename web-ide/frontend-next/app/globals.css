@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+/* ============================================
+   Tailwind v4 Theme Configuration
+   ============================================ */
+@theme {
+    --color-bg-primary: #0a0a0f;
+    --color-bg-secondary: #0f0f14;
+    --color-bg-tertiary: #141419;
+    --color-surface-1: #1e1e1e;
+    --color-surface-2: #252526;
+    --color-surface-3: #2d2d2d;
+    --color-border-subtle: rgba(255, 255, 255, 0.06);
+    --color-border-default: rgba(255, 255, 255, 0.1);
+    --color-text-primary: #e4e4e7;
+    --color-text-secondary: #a1a1aa;
+    --color-text-muted: #71717a;
+    --color-accent-blue: #007acc;
+    --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ============================================
+   Base Element Resets (Critical for buttons/icons)
+   ============================================ */
+@layer base {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Reset all buttons completely */
+    button {
+        all: unset;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        font: inherit;
+        color: inherit;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    /* Reset SVG defaults */
+    svg {
+        display: block;
+        flex-shrink: 0;
+    }
+
+    html,
+    body {
+        height: 100%;
+        width: 100%;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        font-family: var(--font-family-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Remove default focus outlines, we'll add our own */
+    :focus {
+        outline: none;
+    }
+
+    :focus-visible {
+        outline: 1px solid var(--color-accent-blue);
+        outline-offset: 2px;
+    }
+}
+
+/* ============================================
+   Custom scrollbar
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* ============================================
+   Monaco Editor Overrides
+   ============================================ */
+.monaco-editor {
+    --vscode-editor-background: #1e1e1e !important;
+}
+
+.monaco-editor .margin {
+    background: #1e1e1e !important;
+}
+
+/* ============================================
+   Selection
+   ============================================ */
+::selection {
+    background: rgba(0, 122, 204, 0.4);
+    color: white;
+}

@@ -1,4 +1,4 @@
-#include "../include/jam_sdk.c"
+#include "jam_sdk.c"
 
 jam_refine_result_t jam_hook_refine(
     uint32_t item_index,

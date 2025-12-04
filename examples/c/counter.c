@@ -8,8 +8,8 @@
  * - Clean entry points
  */
 
-#include "../include/jam_sdk.c"
-#include "../include/jam_state_vars.h"
+#include "jam_sdk.c"
+#include "jam_state_vars.h"
 
 // Undefine macros from jam_state.h if they conflict
 #undef counter

@@ -58,19 +58,20 @@ pub fn run(args: Args) -> Result<()> {
 
     if is_cpp {
         cmd.arg("-fno-exceptions")
-           .arg("-fno-rtti")
-           .arg("-fno-pic")
-           .arg("-ffixed-s2")
-           .arg("-ffixed-s3")
-           .arg("-ffixed-s4")
-           .arg("-ffixed-s5")
-           .arg("-ffixed-s6")
-           .arg("-ffixed-s7")
-           .arg("-ffixed-s8")
-           .arg("-ffixed-s9")
-           .arg("-ffixed-s10")
-           .arg("-ffixed-s11");
+           .arg("-fno-rtti");
     }
+
+    cmd.arg("-fno-pic")
+       .arg("-ffixed-s2")
+       .arg("-ffixed-s3")
+       .arg("-ffixed-s4")
+       .arg("-ffixed-s5")
+       .arg("-ffixed-s6")
+       .arg("-ffixed-s7")
+       .arg("-ffixed-s8")
+       .arg("-ffixed-s9")
+       .arg("-ffixed-s10")
+       .arg("-ffixed-s11");
 
     for flag in &args.cflags {
         cmd.arg(flag);

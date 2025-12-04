@@ -8,8 +8,8 @@
  * - Global State: total_supply, owner
  */
 
-#include "../../sdk/src/jam_sdk.c"
-#include "../../sdk/src/jam_state_vars.h"
+#include "jam_sdk.c"
+#include "jam_state_vars.h"
 
 // =============================================================================
 // Types
