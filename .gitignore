@@ -6,6 +6,7 @@ __pycache__/
 .Python/
 env/
 venv/
+.venv/
 pip-log.txt
 pip-delete-this-arg.txt
 *.egg-info/

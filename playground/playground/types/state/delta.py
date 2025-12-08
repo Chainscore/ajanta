@@ -63,30 +63,11 @@ class AccountMetadata:
         )
 
 
-class AccountStorage(Dictionary[Bytes, Bytes, "key", "value"]):
-    """Storage dictionary"""
-
-    _meta: AccountMetadata
-
-    def transform(self, service_id: ServiceId):
-        # from jam.state.utils import construct_state_key
-        # res = {}
-        # for k, v in self.items():
-        #     res[construct_state_key((service_id, Bytes(U32(2**32 - 1).encode()) + k))] = v
-        # return res
-        return {}
+class AccountStorage(Dictionary[Bytes, Bytes, "key", "value"]): ...
 
 
 """Preimage dictionary"""
-class AccountPreimages(Dictionary[Bytes[32], Bytes, "hash", "blob"]):
-    
-    def transform(self, service_id: ServiceId):
-        # from jam.state.utils import construct_state_key
-        # res = {}
-        # for k, v in self.items():
-        #     res[construct_state_key((service_id, Bytes(U32(2**32 - 2).encode()) + k))] = v
-        # return res
-        return {}
+class AccountPreimages(Dictionary[Bytes[32], Bytes, "hash", "blob"]): ...
 
 
 """Lookup timestamps"""
@@ -101,6 +82,13 @@ class LookupTable:
     def __hash__(self):
         return int.from_bytes(Hash.blake2b(self.length.encode() + self.hash.encode()))
 
+    def __lt__(self, other):
+        if not isinstance(other, LookupTable):
+            return NotImplemented
+
+        # Sort first by hash, then by length
+        return (self.hash, self.length) < (other.hash, other.length)
+
     def to_json(self):
         return self.encode().hex()
 
@@ -110,18 +98,7 @@ class LookupTable:
             return cls(Bytes[32].from_json(data["hash"]), BlobLength(data["length"]))
         return cls.decode(bytes.fromhex(data))
 
-class AccountLookup(Dictionary[LookupTable, Timestamps, "key", "value"]):
-    """Lookup timestamps"""
-
-    _meta: AccountMetadata
-
-    def transform(self, service_id: ServiceId):
-        # from jam.state.utils import construct_state_key
-        # res = {}
-        # for k, v in self.items():
-        #     res[construct_state_key((service_id, Bytes(U32(k.length).encode()) + k.hash))] = v.encode()
-        # return res
-        return {}
+class AccountLookup(Dictionary[LookupTable, Timestamps, "key", "value"]): ...
 
 @structure
 class AccountData:
@@ -136,35 +113,9 @@ class AccountData:
     storage: AccountStorage = field(metadata={"default": AccountStorage({})})
     preimages: AccountPreimages = field(metadata={"default": AccountPreimages({})})
     lookup: AccountLookup = field(metadata={"name": "lookup_meta", "default": AccountLookup({})})
-
-    def __post_init__(self):
-        self.storage._meta = self.service
-        self.lookup._meta = self.service
-        
-    def transform(self, service_id: ServiceId):
-        # res = {}
-        # from jam.state.utils import construct_state_key
-        # res[construct_state_key((255, service_id))] = self.service.encode()
-        # res.update(self.storage.transform(service_id))
-        # res.update(self.preimages.transform(service_id))
-        # res.update(self.lookup.transform(service_id))
-        # return res
-        return {}
     
     def historical_lookup(self, timeslot, hash):
-        return None
+        return self.preimages[hash]
 
 
-class Delta(Dictionary[ServiceId, AccountData, "id", "data"]):
-    """
-    Component: δ
-    Key: Variable Keys
-
-    Source: https://graypaper.fluffylabs.dev/#/38c4e62/102601102601?v=0.7.0
-    """
-
-    def transform(self) -> dict:
-        res = {}
-        for sid, account in self.items():
-            res.update(account.transform(sid))
-        return res
+class Delta(Dictionary[ServiceId, AccountData, "id", "data"]): ...

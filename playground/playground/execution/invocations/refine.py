@@ -117,7 +117,6 @@ class PsiR(InvocationProtocol):
             + bytes(Hash.blake2b(self.work_package.encode()))
         )
         
-        start = time.time()
         u, r, context = PsiM.execute(
             pc,
             ProgramCounter(0),
@@ -126,7 +125,6 @@ class PsiR(InvocationProtocol):
             self.dispatch,
             RefineContext(m=RefinementMap({}), e=Segments([])),
         )
-        print(f"Refinement completed! \nTime Taken \t {(1000 * (time.time() - start)):.2f} ms\nGas consumed \t {int(u)}\n ")
 
         if r == PANIC:
             return WorkExecResult(Null, key="panic"), Segments([]), Gas(u)

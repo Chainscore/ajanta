@@ -1,13 +1,12 @@
-from jam.state.accounts import AccountDataView, DeltaView
-from jam.state.partial import GhostPartial
+from playground.types.state.partial import GhostPartial
 from playground.types.state.accumulation.types import (
     AccumulationContext,
     DeferredTransfer,
 )
 from tsrkit_types import U32, U64, Bytes
 from playground.types.protocol.validators import ValidatorData
-from jam.log_setup import pvm_logger as logger
-from jam.execution.invocations.functions.protocol import (
+from playground.log_setup import pvm_logger as logger, logger as jam_logger
+from playground.execution.invocations.functions.protocol import (
     InvocationFunctions as INVF,
 )
 from playground.types.state.iota import Iota
@@ -224,7 +223,7 @@ class AccumulateFunctions(INVF):
         if not memory.is_accessible(o, 32):
             raise PvmError(PANIC)
 
-        xs: AccountDataView = context.x.partial_state.service_accounts[context.x.s_index].service
+        xs = context.x.partial_state.service_accounts[context.x.s_index].service
         xs.code_hash = ServiceCodeHash(memory.read(o, 32))
         xs.gas_limit = Gas(g)
         xs.min_gas = Gas(m)
@@ -237,7 +236,7 @@ class AccumulateFunctions(INVF):
         [d, a, l, o] = registers[7 : 7 + 4]
         gas = gas - l
 
-        delta: DeltaView = context.x.partial_state.service_accounts
+        delta = context.x.partial_state.service_accounts
 
         if not memory.is_accessible(o, TRANSFER_MEMO_SIZE):
             raise PvmError(PANIC)
@@ -286,7 +285,7 @@ class AccumulateFunctions(INVF):
 
         code_hash = Bytes[32](memory.read(o, 32))
 
-        delta: DeltaView = context.x.partial_state.service_accounts
+        delta = context.x.partial_state.service_accounts
 
         account = None
         if d in delta and d != context.x.s_index:
@@ -373,9 +372,6 @@ class AccumulateFunctions(INVF):
         if not memory.is_accessible(preimage_hash_addr, 32):
             raise PvmError(PANIC)
         preimage_hash = Bytes[32](memory.read(preimage_hash_addr, 32))
-        from jam.state.state import state
-
-        # state.store.save_n_clear_cache()
 
         # Account
         account: AccountData = context.x.partial_state.service_accounts[context.x.s_index]

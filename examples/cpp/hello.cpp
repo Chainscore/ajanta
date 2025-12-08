@@ -42,11 +42,11 @@ jam_refine_result_t refine(
 }
 
 void accumulate(uint32_t timeslot, uint32_t service_id, uint64_t num_inputs) {
-    // No-op
+    LOG_INFO("EEHUU Im in accumulate!");
 }
 
 void on_transfer(uint32_t sender, uint32_t receiver, uint64_t amount, const uint8_t* memo, uint64_t memo_len) {
-    // No-op
+    LOG_INFO("EEHUU Im in on_transfer!");
 }
 
 EXPORT_REFINE(refine)

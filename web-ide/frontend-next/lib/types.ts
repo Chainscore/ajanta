@@ -27,4 +27,24 @@ export interface RunResponse {
   logs: string;
 }
 
-export type Status = 'idle' | 'compiling' | 'running' | 'success' | 'error';
+export type Status = 'idle' | 'compiling' | 'running' | 'deploying' | 'invoking' | 'accumulating' | 'success' | 'error';
+
+export type Environment = 'simulation' | 'live';
+
+export interface DeployResponse {
+  success: boolean;
+  serviceId?: string;
+  logs: string;
+}
+
+export interface InvokeResponse {
+  success: boolean;
+  result?: string;
+  logs: string;
+}
+
+export interface AccumulateResponse {
+  success: boolean;
+  result: string;
+  logs: string;
+}

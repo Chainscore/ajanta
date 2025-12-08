@@ -5,7 +5,7 @@ from playground.execution.invocations.refine import PsiR
 from playground.types.work.package import WorkPackage, WorkPackageSpec, Authorizer, WorkItems
 from playground.types.work.item import WorkItem, ImportSpecs, ExtrinsicSpecs
 from playground.types.protocol.core import ServiceId, Gas, Balance, TimeSlot
-from playground.types.protocol.crypto import OpaqueHash
+from playground.types.protocol.crypto import Hash, OpaqueHash
 from playground.types.state.state import state
 from playground.types.state.delta import AccountData, AccountMetadata
 from playground.types.work.report import RefineContext
@@ -16,7 +16,6 @@ def test_refine(caplog):
     caplog.set_level(logging.DEBUG)
     
     code = open(os.path.join(os.path.dirname(__file__), "../../build/service.pvm"), "rb").read()
-
     # Prepare arguments
     payload = b'Kartik'
     service_id = ServiceId(0)
@@ -34,14 +33,14 @@ def test_refine(caplog):
         num_o=Uint[64](0),
     )
     account_data = AccountData(service=account_metadata)
-    
-    account_data.historical_lookup = MagicMock(return_value=Bytes(code))
     state.delta[service_id] = account_data
+    state.delta[service_id].service.code_hash = Hash.blake2b(code)
+    state.delta[service_id].preimages[Hash.blake2b(code)] = Bytes(code)
 
     # Create WorkItem
     work_item = WorkItem(
         service=service_id,
-        code_hash=OpaqueHash(bytes([0]*32)), # Dummy hash
+        code_hash=OpaqueHash(Hash.blake2b(code)),
         refine_gas_limit=Gas(10000000),
         accumulate_gas_limit=Gas(10000000),
         export_count=Uint(0),
@@ -54,7 +53,8 @@ def test_refine(caplog):
     work_package = WorkPackage(
         auth_code_host=ServiceId(0),
         authorization=Bytes(b""),
-        authorizer=Authorizer(code_hash=OpaqueHash(bytes([0]*32)), params=Bytes(b"")),
+        authorizer=Authorizer(code_hash=OpaqueHash(Hash.blake2b(code)), 
+                              params=Bytes(b"")),
         context=RefineContext.empty(),
         items=WorkItems([work_item])
     )

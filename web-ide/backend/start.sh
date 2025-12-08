@@ -1,0 +1,3 @@
+#!/bin/bash
+export PYTHONPATH=$PYTHONPATH:$(pwd)/../../:$(pwd)/../../aj-lang
+uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000

@@ -50,6 +50,8 @@ export function Console({ logs, status }: ConsolePanelProps) {
     switch (status) {
       case 'compiling': return 'compiling...';
       case 'running': return 'running...';
+      case 'deploying': return 'deploying...';
+      case 'invoking': return 'invoking...';
       case 'success': return 'success';
       case 'error': return 'error';
       default: return 'ready';
@@ -61,6 +63,9 @@ export function Console({ logs, status }: ConsolePanelProps) {
       case 'compiling':
       case 'running':
         return '#00c8ff';
+      case 'deploying':
+      case 'invoking':
+        return '#ff8800';
       case 'success':
         return '#00ff88';
       case 'error':

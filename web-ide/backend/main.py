@@ -142,6 +142,13 @@ from playground.types.protocol.crypto import OpaqueHash
 from playground.types.state.state import state
 from playground.types.state.delta import AccountData, AccountMetadata
 from playground.types.work.report import RefineContext
+from playground.execution.invocations.accumulate import PsiA
+from playground.types.state.accumulation.types import OperandTuples, OperandTuple
+from playground.types.state.partial import GhostPartial
+from playground.types.protocol.core import WorkPackageHash, ExportsRoot
+from playground.types.protocol.crypto import Hash
+from playground.types.state.phi import AuthorizerHash
+from playground.types.work import WorkExecResult
 from tsrkit_types import Bytes, Uint
 
 class RunRequest(BaseModel):
@@ -233,3 +240,257 @@ async def run_service(request: RunRequest):
         return {"success": False, "logs": log_capture_string.getvalue() + "\n" + traceback.format_exc()}
     finally:
         logger.removeHandler(ch)
+
+
+class AccumulateRequest(BaseModel):
+    pvm_hex: str
+
+@app.post("/accumulate")
+async def accumulate_service(request: AccumulateRequest):
+    # Decode PVM
+    try:
+        pvm_bytes = bytes.fromhex(request.pvm_hex)
+    except ValueError:
+        return {"success": False, "logs": "Invalid hex string"}
+    
+    # Setup logging
+    log_capture_string = io.StringIO()
+    ch = logging.StreamHandler(log_capture_string)
+    ch.setLevel(logging.DEBUG)
+    logger = logging.getLogger()
+    logger.addHandler(ch)
+    logger.setLevel(logging.DEBUG)
+    
+    try:
+        # PVM Code
+        code = pvm_bytes
+        service_id = ServiceId(0)
+        
+        # Setup Account Data (Reset state for simulation)
+        account_metadata = AccountMetadata(
+            code_hash=Bytes[32](bytes([0]*32)), # Dummy hash
+            balance=Balance(10**12),
+            gratis_offset=Balance(100),
+            gas_limit=Gas(10000000),
+            min_gas=Gas(0),
+            created_at=TimeSlot(0),
+            accumulated_at=TimeSlot(0),
+            parent_service=ServiceId(1),
+            num_i=Uint[32](0),
+            num_o=Uint[64](0),
+        )
+        account_data = AccountData(service=account_metadata)
+        state.delta[service_id] = account_data
+        
+        # Calculate code hash and store preimage
+        code_hash = Hash.blake2b(code)
+        state.delta[service_id].service.code_hash = code_hash
+        state.delta[service_id].preimages[code_hash] = Bytes(code)
+        
+        # Prepare OperandTuples (Dummy data for simulation)
+        operand_tuple = OperandTuple(
+            p=WorkPackageHash(bytes([0]*32)),
+            e=ExportsRoot(bytes([0]*32)),
+            a=AuthorizerHash(bytes([0]*32)),
+            y=OpaqueHash(bytes([0]*32)),
+            g=Uint(1000),
+            l=WorkExecResult(bytes([0]*32)),
+            t=Bytes(b"")
+        )
+        
+        operand_tuples = OperandTuples([operand_tuple])
+        
+        # GhostPartial wrapper
+        partial_state = GhostPartial(
+            service_accounts=state.delta,
+            validator_keys=state.iota,
+            authorizer_keys=state.phi,
+            privileges=state.chi
+        )
+        
+        timeslot = TimeSlot(1)
+        gas_limit = Gas(10000000)
+        entropy = OpaqueHash(bytes([0]*32))
+        
+        psia = PsiA(
+            u=partial_state,
+            t=timeslot,
+            s=service_id,
+            g=gas_limit,
+            o=operand_tuples,
+            entropy=entropy
+        )
+        
+        # Execute
+        result, deferred_transfers, commitment, gas_used, preimages = psia.execute()
+        
+        # Format logs
+        print(f"Deferred Transfers: {deferred_transfers}")
+        print(f"Commitment: {commitment}")
+        print(f"Preimages added: {preimages}")
+        print(f"Gas Used: {gas_used}")
+        
+        logs = log_capture_string.getvalue()
+        
+        return {
+            "success": True,
+            "logs": logs,
+            "result": f"Gas Used: {gas_used}\nCommitment: {commitment}"
+        }
+        
+    except Exception as e:
+        import traceback
+        return {"success": False, "logs": log_capture_string.getvalue() + "\n" + traceback.format_exc()}
+    finally:
+        logger.removeHandler(ch)
+
+
+# =============================================
+# Live Network Support (via jamt CLI)
+# =============================================
+
+# Path to jamt binary
+JAMT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "bin/jamt"))
+
+
+class DeployRequest(BaseModel):
+    pvm_hex: str
+    rpc_url: str = "ws://localhost:19800"
+    initial_amount: int = 10000
+
+
+class InvokeRequest(BaseModel):
+    service_id: str
+    payload: str = ""
+    rpc_url: str = "ws://localhost:19800"
+
+
+class NetworkStatusRequest(BaseModel):
+    rpc_url: str = "ws://localhost:19800"
+
+
+@app.post("/network-status")
+async def network_status(request: NetworkStatusRequest):
+    """Check if the network is reachable via jamt."""
+    try:
+        result = subprocess.run(
+            [JAMT_PATH, "--rpc", request.rpc_url, "queue"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            return {"success": True, "status": "connected", "logs": result.stdout}
+        else:
+            return {"success": False, "status": "error", "logs": result.stderr or result.stdout}
+    except subprocess.TimeoutExpired:
+        return {"success": False, "status": "timeout", "logs": "Connection timed out"}
+    except Exception as e:
+        return {"success": False, "status": "error", "logs": str(e)}
+
+
+@app.post("/deploy")
+async def deploy_service(request: DeployRequest):
+    """Deploy a service to the live network using jamt create-service."""
+    # Decode PVM hex
+    try:
+        pvm_bytes = bytes.fromhex(request.pvm_hex)
+    except ValueError:
+        return {"success": False, "logs": "Invalid hex string", "serviceId": None}
+    
+    # Write PVM to temp file
+    with tempfile.TemporaryDirectory() as temp_dir:
+        pvm_path = os.path.join(temp_dir, "service.pvm")
+        with open(pvm_path, "wb") as f:
+            f.write(pvm_bytes)
+        
+        # Run jamt create-service
+        cmd = [
+            JAMT_PATH,
+            "--rpc", request.rpc_url,
+            "create-service",
+            pvm_path,
+            str(request.initial_amount)
+        ]
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=120  # Deployment can take a while
+            )
+            
+            output = result.stdout + "\n" + result.stderr
+            
+            # Parse service ID from output
+            # Expected: "Service 0a27f8ea created at slot 4912067"
+            service_id = None
+            for line in output.split("\n"):
+                if "Service" in line and "created" in line:
+                    # Extract service ID (hex string after "Service ")
+                    import re
+                    match = re.search(r'Service\s+([0-9a-fA-F]+)\s+created', line)
+                    if match:
+                        service_id = match.group(1)
+                        break
+            
+            if result.returncode == 0 and service_id:
+                return {
+                    "success": True,
+                    "serviceId": service_id,
+                    "logs": output
+                }
+            else:
+                return {
+                    "success": False,
+                    "serviceId": None,
+                    "logs": output or "Deployment failed with no output"
+                }
+                
+        except subprocess.TimeoutExpired:
+            return {"success": False, "serviceId": None, "logs": "Deployment timed out after 120 seconds"}
+        except Exception as e:
+            return {"success": False, "serviceId": None, "logs": str(e)}
+
+
+@app.post("/invoke")
+async def invoke_service(request: InvokeRequest):
+    """Invoke a deployed service using jamt item."""
+    # Run jamt item
+    cmd = [
+        JAMT_PATH,
+        "--rpc", request.rpc_url,
+        "item",
+        request.service_id,
+        request.payload
+    ]
+    
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        
+        output = result.stdout + "\n" + result.stderr
+        
+        if result.returncode == 0:
+            return {
+                "success": True,
+                "result": output,
+                "logs": output
+            }
+        else:
+            return {
+                "success": False,
+                "result": None,
+                "logs": output or "Invocation failed with no output"
+            }
+            
+    except subprocess.TimeoutExpired:
+        return {"success": False, "result": None, "logs": "Invocation timed out after 120 seconds"}
+    except Exception as e:
+        return {"success": False, "result": None, "logs": str(e)}

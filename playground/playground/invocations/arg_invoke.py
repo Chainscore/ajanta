@@ -1,7 +1,7 @@
 import time
 from typing import Any, Tuple
-from jam.execution.host_call import HostCallReturn, PsiH
-from jam.execution.invocations.protocol import Context, DispatchFunction
+from playground.execution.host_call import HostCallReturn, PsiH
+from playground.execution.invocations.protocol import Context, DispatchFunction
 from tsrkit_pvm import PANIC, ExecutionStatus, y_function
 from tsrkit_types.bytes import Bytes
 from playground.types.protocol.core import Gas

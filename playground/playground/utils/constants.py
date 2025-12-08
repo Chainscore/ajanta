@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 
 # Mock chain_config
 class ChainConfig:
-    num_cores = 341
+    num_cores = 2
     epoch_duration = 600
     preimage_expunge_period = 40320
     max_refine_gas = 10_000_000
@@ -16,7 +16,7 @@ class ChainConfig:
     tickets_per_validator = 2
     slot_duration = 6
     rotation_period = 60
-    num_validators = 1023
+    num_validators = 6
     num_ec_pieces_per_segment = 3
     ticket_submission_end = 480
 

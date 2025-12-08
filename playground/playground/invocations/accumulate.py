@@ -8,15 +8,15 @@ from playground.types.state.accumulation.types import (
     AccumulationContext,
     PreimageDict,
 )
-from jam.execution.invocations.arg_invoke import PsiM
-from jam.execution.invocations.functions.general_fns import GeneralFunctions
-from jam.execution.invocations.protocol import InvocationInfo, InvocationProtocol
+from playground.execution.invocations.arg_invoke import PsiM
+from playground.execution.invocations.functions.general_fns import GeneralFunctions
+from playground.execution.invocations.protocol import InvocationInfo, InvocationProtocol
 from tsrkit_types.null import Null
 from tsrkit_types.integers import Uint
 from playground.types.protocol.core import Gas, ServiceId, TimeSlot
 from playground.types.protocol.crypto import Hash, OpaqueHash
 from playground.types.protocol.merkle import OptionHash
-from jam.execution.invocations.functions.accumulate_fns import (
+from playground.execution.invocations.functions.accumulate_fns import (
     AccumulateFunctions,
     check,
 )

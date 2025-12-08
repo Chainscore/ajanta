@@ -1,6 +1,6 @@
-from jam.execution.invocations.functions.general_fns import GeneralFunctions
-from jam.execution.invocations.arg_invoke import PsiM
-from jam.execution.invocations.protocol import InvocationProtocol
+from playground.execution.invocations.functions.general_fns import GeneralFunctions
+from playground.execution.invocations.arg_invoke import PsiM
+from playground.execution.invocations.protocol import InvocationProtocol
 from playground.types.protocol.core import CoreIndex, ProgramCounter
 from playground.types.protocol.crypto import OpaqueHash
 from playground.types.work import WorkPackage

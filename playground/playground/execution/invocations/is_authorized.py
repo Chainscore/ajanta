@@ -1,6 +1,6 @@
-from jam.execution.invocations.functions.general_fns import GeneralFunctions
-from jam.execution.invocations.arg_invoke import PsiM
-from jam.execution.invocations.protocol import InvocationProtocol
+from playground.execution.invocations.functions.general_fns import GeneralFunctions
+from playground.execution.invocations.arg_invoke import PsiM
+from playground.execution.invocations.protocol import InvocationProtocol
 from playground.types.protocol.core import CoreIndex, ProgramCounter
 from playground.types.protocol.crypto import OpaqueHash
 from playground.types.work import WorkPackage
@@ -9,7 +9,7 @@ from tsrkit_pvm import HostStatus
 
 
 class PsiI(InvocationProtocol):
-    def __init__(self, p: WorkPackage, c: CoreIndex):
+    def __init__(self, p: WorkPackage, c: CoreIndex): # type: ignore
         self.work_package = p
         self.core = c
 
@@ -33,7 +33,7 @@ class PsiI(InvocationProtocol):
         }
 
     def execute(self):
-        from jam.state.state import state
+        from playground.types.state.state import state
 
         _, pc = self.work_package.m_c(state.delta)
 

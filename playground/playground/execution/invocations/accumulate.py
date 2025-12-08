@@ -1,6 +1,7 @@
 from typing import Any, Dict, Tuple
+from playground.execution.utils import decode_code_hash
+from playground.types.state.partial import GhostPartial
 from tsrkit_types import U32
-from jam.state.partial import GhostPartial
 from playground.types.state.accumulation.types import (
     DeferredTransfers,
     OperandTuples,
@@ -8,15 +9,15 @@ from playground.types.state.accumulation.types import (
     AccumulationContext,
     PreimageDict,
 )
-from jam.execution.invocations.arg_invoke import PsiM
-from jam.execution.invocations.functions.general_fns import GeneralFunctions
-from jam.execution.invocations.protocol import InvocationInfo, InvocationProtocol
+from playground.execution.invocations.arg_invoke import PsiM
+from playground.execution.invocations.functions.general_fns import GeneralFunctions
+from playground.execution.invocations.protocol import InvocationInfo, InvocationProtocol
 from tsrkit_types.null import Null
 from tsrkit_types.integers import Uint
 from playground.types.protocol.core import Gas, ServiceId, TimeSlot
 from playground.types.protocol.crypto import Hash, OpaqueHash
 from playground.types.protocol.merkle import OptionHash
-from jam.execution.invocations.functions.accumulate_fns import (
+from playground.execution.invocations.functions.accumulate_fns import (
     AccumulateFunctions,
     check,
 )
@@ -116,12 +117,16 @@ class PsiA(InvocationProtocol):
         }
 
     def execute(self):
-        meta_n_code = self.partial_state.service_accounts[self.service_id].m_c()
-        if meta_n_code is None or len(meta_n_code[1]) > MAX_SERVICE_CODE_SIZE:
+        _, pc = decode_code_hash(
+            self.partial_state.service_accounts[self.service_id].historical_lookup(
+                0, self.partial_state.service_accounts[self.service_id].service.code_hash
+            )
+        )
+        if pc is None or len(pc) > MAX_SERVICE_CODE_SIZE:
             return self.partial_state, DeferredTransfers([]), None, Gas(0), set()
         else:
             gas, status, context = PsiM.execute(
-                meta_n_code[1],
+                pc,
                 5,
                 int(self.gas),
                 Uint(self.timeslot).encode()
@@ -143,7 +148,7 @@ class PsiA(InvocationProtocol):
         Returns:
             Mutator context
         """
-        from jam.state.state import state
+        from playground.types.state.state import state
 
         value = (
             U32.decode(

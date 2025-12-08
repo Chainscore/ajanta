@@ -2,16 +2,16 @@ from typing import Tuple
 
 from tsrkit_types import Bytes, Null
 import time 
-from jam.execution.invocations.functions.general_fns import GeneralFunctions
-from jam.execution.invocations.arg_invoke import PsiM
-from jam.execution.invocations.functions.refine_fns import (
+from playground.execution.invocations.functions.general_fns import GeneralFunctions
+from playground.execution.invocations.arg_invoke import PsiM
+from playground.execution.invocations.functions.refine_fns import (
     RefineFunctions,
     RefineContext,
     RefinementMap,
 )
-from jam.execution.invocations.protocol import InvocationProtocol
+from playground.execution.invocations.protocol import InvocationProtocol
 from tsrkit_pvm import OUT_OF_GAS, PANIC
-from jam.execution.utils import decode_code_hash
+from playground.execution.utils import decode_code_hash
 from tsrkit_types.integers import Uint
 
 from playground.types.work import WorkExecResult, Segments, WorkPackage

@@ -1,0 +1,22 @@
+[project]
+name = "ajanta-ide-backend"
+version = "0.1.0"
+description = "Backend for Ajanta IDE"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
+    "websockets",
+    "bitarray",
+    "safe-pysha3",
+    "tsrkit-types",
+    "tsrkit-pvm",
+    "tsrkit-asm",
+]
+
+[tool.uv.sources]
+tsrkit-types = { path = "../../playground/deps/tsrkit-types", editable = true }
+tsrkit-pvm = { path = "../../playground/deps/tsrkit-pvm", editable = true }
+tsrkit-asm = { path = "../../playground/deps/tsrkit-asm", editable = true }
