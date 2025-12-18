@@ -85,12 +85,52 @@ async def compile_service(request: CompileRequest):
         env["PATH"] = f"{cargo_bin}:{env.get('PATH', '')}"
         
         if request.language == "python":
-            cmd = ["ajanta", "build", source_path, "-o", output_path]
+            # Python workflow: transpile to C first, then compile to PVM
+            c_output_path = source_path.replace(".py", ".c")
+            cmd = ["ajanta", "build", source_path, "-o", c_output_path]
+            
+            # Step 1: Transpile Python to C
+            try:
+                result = subprocess.run(
+                    cmd, 
+                    cwd=project_root,
+                    env=env,
+                    capture_output=True, 
+                    text=True,
+                    check=False
+                )
+                
+                if result.returncode != 0:
+                    return {"success": False, "logs": result.stdout + "\n" + result.stderr}
+                
+                # Find the generated C file - ajanta puts it in build/ or same dir
+                if not os.path.exists(c_output_path):
+                    # Check for C file with same name
+                    possible_c_file = os.path.join(os.path.dirname(source_path), "service.c")
+                    if os.path.exists(possible_c_file):
+                        c_output_path = possible_c_file
+                    else:
+                        # Parse output for actual C file path
+                        for line in (result.stdout + result.stderr).split('\n'):
+                            if 'Generated C code:' in line:
+                                c_output_path = line.split('Generated C code:')[1].strip()
+                                break
+                
+                if not os.path.exists(c_output_path):
+                    return {"success": False, "logs": f"Transpilation succeeded but C file not found.\n{result.stdout}"}
+                
+                transpile_logs = result.stdout
+                
+            except Exception as e:
+                return {"success": False, "logs": f"Transpilation error: {str(e)}"}
+            
+            # Step 2: Compile C to PVM using ajanta-build-tool
+            cmd = ["ajanta-build-tool", "build", c_output_path, "-o", output_path]
+            
         else:
             # C or C++
-            # Ensure ajanta-build-tool is in path or use absolute path if we knew it
-            # Assuming it's in PATH
             cmd = ["ajanta-build-tool", "build", source_path, "-o", output_path]
+            transpile_logs = ""
             
         # Run build
         try:
@@ -103,8 +143,10 @@ async def compile_service(request: CompileRequest):
                 check=False
             )
             
+            all_logs = (transpile_logs + "\n" if request.language == "python" else "") + result.stdout + "\n" + result.stderr
+            
             if result.returncode != 0:
-                return {"success": False, "logs": result.stdout + "\n" + result.stderr}
+                return {"success": False, "logs": all_logs}
             
             # Read PVM
             if os.path.exists(output_path):
@@ -113,11 +155,11 @@ async def compile_service(request: CompileRequest):
                 
                 return {
                     "success": True, 
-                    "logs": result.stdout,
+                    "logs": all_logs,
                     "pvm": pvm_bytes.hex()
                 }
             else:
-                return {"success": False, "logs": "Build succeeded but output file not found.\n" + result.stdout}
+                return {"success": False, "logs": "Build succeeded but output file not found.\n" + all_logs}
             
         except Exception as e:
             return {"success": False, "logs": str(e)}

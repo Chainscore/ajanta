@@ -7,17 +7,19 @@ import { Sidebar } from '@/components/ide/Sidebar';
 import { EditorArea } from '@/components/ide/EditorArea';
 import { ControlPanel } from '@/components/ide/ControlPanel';
 import { Console } from '@/components/ide/Console';
+import { NewFileModal } from '@/components/ui/NewFileModal';
 import { useFileSystem } from '@/lib/hooks/useFileSystem';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
-import type { Template, CompileResponse, RunResponse, AccumulateResponse, DeployResponse, InvokeResponse, Status, Environment } from '@/lib/types';
+import type { Template, CompileResponse, RunResponse, AccumulateResponse, Status, Environment } from '@/lib/types';
+import { deployService, invokeService } from '@/lib/jam';
 
-const DEFAULT_API_URL = 'http://localhost:8000';
-const DEFAULT_RPC_URL = 'ws://localhost:19800';
+const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const DEFAULT_RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'ws://localhost:19800';
 
 // Local storage keys
-const BACKEND_URL_KEY = 'ajanta_ide_backend_url';
-const RPC_URL_KEY = 'ajanta_ide_rpc_url';
-const ENVIRONMENT_KEY = 'ajanta_ide_environment';
+const BACKEND_URL_KEY = 'jamcode_ide_backend_url';
+const RPC_URL_KEY = 'jamcode_ide_rpc_url';
+const ENVIRONMENT_KEY = 'jamcode_ide_environment';
 
 export default function IDEPage() {
   const coerceLanguage = (value: string): 'python' | 'c' | 'cpp' => {
@@ -66,6 +68,7 @@ export default function IDEPage() {
   const [pvmHex, setPvmHex] = useState<string | null>(null);
   const [payload, setPayload] = useState<string>('');
   const [deployedServiceId, setDeployedServiceId] = useState<string | null>(null);
+  const [showNewFileModal, setShowNewFileModal] = useState(false);
 
   // Persist settings to localStorage
   useEffect(() => {
@@ -122,9 +125,10 @@ export default function IDEPage() {
   };
 
   const handleCreateFile = () => {
-    const filename = prompt('Enter filename (e.g., service.py, main.c, app.cpp):');
-    if (!filename) return;
+    setShowNewFileModal(true);
+  };
 
+  const handleNewFileSubmit = (filename: string) => {
     createFile(filename, coerceLanguage(filename));
   };
 
@@ -233,39 +237,35 @@ export default function IDEPage() {
     }
 
     setStatus('deploying');
-    setLogs((prev) => prev + '\n\n🚀 Deploying to live network...\n');
+    setLogs((prev) => prev + '\n\n🚀 Deploying to live network (direct RPC)...\n');
     setLogs((prev) => prev + `📡 RPC: ${rpcUrl}\n`);
 
     try {
-      const res = await axios.post<DeployResponse>(`${apiUrl}/deploy`, {
-        pvm_hex: pvmHex,
-        rpc_url: rpcUrl,
-        initial_amount: 10000,
-      });
+      // Use direct JAM RPC instead of backend
+      const result = await deployService(
+        rpcUrl,
+        pvmHex,
+        10000,
+        (msg) => setLogs((prev) => prev + msg)
+      );
 
-      if (res.data.success && res.data.serviceId) {
+      if (result.success && result.serviceId) {
         setStatus('success');
-        setDeployedServiceId(res.data.serviceId);
+        setDeployedServiceId(result.serviceId);
         setLogs(
           (prev) =>
-            prev +
-            `\n📦 DEPLOYMENT OUTPUT:\n${res.data.logs}\n\n✅ Service deployed!`
-        );
-        setLogs(
-          (prev) =>
-            prev +
-            `\n\n🆔 Service ID: ${res.data.serviceId}`
+            prev + `\n🆔 Service ID: ${result.serviceId}`
         );
       } else {
         setStatus('error');
-        setLogs((prev) => prev + `\n\n❌ DEPLOYMENT FAILED:\n${res.data.logs}`);
+        setLogs((prev) => prev + `\n\n❌ DEPLOYMENT FAILED: ${result.error || 'Unknown error'}`);
       }
     } catch (err) {
       setStatus('error');
       const message = err instanceof Error ? err.message : 'Unknown error';
       setLogs((prev) => prev + `\n\n❌ Deployment failed: ${message}`);
     }
-  }, [pvmHex, rpcUrl, apiUrl]);
+  }, [pvmHex, rpcUrl]);
 
   const handleInvoke = useCallback(async () => {
     if (!deployedServiceId) {
@@ -274,34 +274,35 @@ export default function IDEPage() {
     }
 
     setStatus('invoking');
-    setLogs((prev) => prev + '\n\n⚡ Invoking service on live network...\n');
+    setLogs((prev) => prev + '\n\n⚡ Invoking service on live network (direct RPC)...\n');
     setLogs((prev) => prev + `📡 RPC: ${rpcUrl}\n`);
     setLogs((prev) => prev + `🆔 Service: ${deployedServiceId}\n`);
 
     try {
-      const res = await axios.post<InvokeResponse>(`${apiUrl}/invoke`, {
-        service_id: deployedServiceId,
-        payload: payload,
-        rpc_url: rpcUrl,
-      });
+      // Use direct JAM RPC instead of backend
+      const result = await invokeService(
+        rpcUrl,
+        deployedServiceId,
+        payload,
+        (msg) => setLogs((prev) => prev + msg)
+      );
 
-      if (res.data.success) {
+      if (result.success) {
         setStatus('success');
         setLogs(
           (prev) =>
-            prev +
-            `\n📤 INVOCATION OUTPUT:\n${res.data.logs}\n\n✅ Invocation complete!`
+            prev + `\n✅ Invocation complete! Package: ${result.packageHash?.substring(0, 16)}...`
         );
       } else {
         setStatus('error');
-        setLogs((prev) => prev + `\n\n❌ INVOCATION FAILED:\n${res.data.logs}`);
+        setLogs((prev) => prev + `\n\n❌ INVOCATION FAILED: ${result.error || 'Unknown error'}`);
       }
     } catch (err) {
       setStatus('error');
       const message = err instanceof Error ? err.message : 'Unknown error';
       setLogs((prev) => prev + `\n\n❌ Invocation failed: ${message}`);
     }
-  }, [deployedServiceId, payload, rpcUrl, apiUrl]);
+  }, [deployedServiceId, payload, rpcUrl]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -365,6 +366,13 @@ export default function IDEPage() {
       </div>
 
       <Console logs={logs} status={status} />
+
+      {/* New File Modal */}
+      <NewFileModal
+        isOpen={showNewFileModal}
+        onClose={() => setShowNewFileModal(false)}
+        onSubmit={handleNewFileSubmit}
+      />
     </div>
   );
 }

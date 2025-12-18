@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import type { File, FileSystem } from '../types';
 
-const STORAGE_KEY = 'ajanta_ide_fs';
-const ACTIVE_FILE_KEY = 'ajanta_ide_active_file';
+const STORAGE_KEY = 'jamcode_ide_fs';
+const ACTIVE_FILE_KEY = 'jamcode_ide_active_file';
 
 const DEFAULT_TEMPLATE_PYTHON = `from aj_lang.decorators import service, refine, accumulate, on_transfer
 

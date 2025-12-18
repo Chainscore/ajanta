@@ -1,0 +1,124 @@
+name: Deploy Web-IDE to Azure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web-ide/**'
+      - 'playground/deps/**'
+      - 'aj-lang/**'
+      - 'examples/**'
+      - 'sdk/**'
+      - 'ajanta-build-tool/**'
+      - '.github/workflows/deploy-web-ide.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: ajanta-web-ide-rg
+  ACR_NAME: ajantawebideacr
+  BACKEND_APP_NAME: ajanta-backend
+  FRONTEND_APP_NAME: ajanta-frontend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get ACR credentials
+        id: acr
+        run: |
+          ACR_LOGIN_SERVER=$(az acr show --name ${{ env.ACR_NAME }} --query loginServer --output tsv)
+          ACR_USERNAME=$(az acr credential show --name ${{ env.ACR_NAME }} --query username --output tsv)
+          ACR_PASSWORD=$(az acr credential show --name ${{ env.ACR_NAME }} --query "passwords[0].value" --output tsv)
+          echo "login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
+          echo "username=$ACR_USERNAME" >> $GITHUB_OUTPUT
+          echo "password=$ACR_PASSWORD" >> $GITHUB_OUTPUT
+
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ steps.acr.outputs.login_server }}
+          username: ${{ steps.acr.outputs.username }}
+          password: ${{ steps.acr.outputs.password }}
+
+      - name: Get Backend URL
+        id: backend-url
+        run: |
+          BACKEND_URL=$(az containerapp show \
+            --name ${{ env.BACKEND_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" \
+            --output tsv)
+          echo "url=https://$BACKEND_URL" >> $GITHUB_OUTPUT
+
+      - name: Build and push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./web-ide/backend/Dockerfile
+          push: true
+          tags: ${{ steps.acr.outputs.login_server }}/${{ env.BACKEND_APP_NAME }}:${{ github.sha }},${{ steps.acr.outputs.login_server }}/${{ env.BACKEND_APP_NAME }}:latest
+
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./web-ide/frontend-next
+          file: ./web-ide/frontend-next/Dockerfile
+          push: true
+          tags: ${{ steps.acr.outputs.login_server }}/${{ env.FRONTEND_APP_NAME }}:${{ github.sha }},${{ steps.acr.outputs.login_server }}/${{ env.FRONTEND_APP_NAME }}:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ steps.backend-url.outputs.url }}
+
+      - name: Update Backend Container App
+        run: |
+          az containerapp update \
+            --name ${{ env.BACKEND_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --image ${{ steps.acr.outputs.login_server }}/${{ env.BACKEND_APP_NAME }}:${{ github.sha }}
+
+      - name: Update Frontend Container App
+        run: |
+          az containerapp update \
+            --name ${{ env.FRONTEND_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --image ${{ steps.acr.outputs.login_server }}/${{ env.FRONTEND_APP_NAME }}:${{ github.sha }}
+
+      - name: Get Frontend URL
+        id: frontend-url
+        run: |
+          FRONTEND_URL=$(az containerapp show \
+            --name ${{ env.FRONTEND_APP_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query "properties.configuration.ingress.fqdn" \
+            --output tsv)
+          echo "url=https://$FRONTEND_URL" >> $GITHUB_OUTPUT
+
+      - name: Test Frontend Accessibility
+        run: |
+          echo "Testing frontend accessibility..."
+          sleep 30  # Wait for deployment to stabilize
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" ${{ steps.frontend-url.outputs.url }} || echo "000")
+          echo "HTTP Status Code: $HTTP_CODE"
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Frontend is accessible!"
+          else
+            echo "⚠️ Frontend returned status $HTTP_CODE"
+          fi
+
+      - name: Deployment Summary
+        run: |
+          echo "## 🎉 Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | ${{ steps.frontend-url.outputs.url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend | ${{ steps.backend-url.outputs.url }} |" >> $GITHUB_STEP_SUMMARY

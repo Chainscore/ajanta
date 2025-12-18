@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ff88"/>
+      <stop offset="100%" style="stop-color:#00c8ff"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.1">
+    <line x1="0" y1="0" x2="1200" y2="0" stroke="#00ff88" stroke-width="1"/>
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="#00ff88" stroke-width="1"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="#00ff88" stroke-width="1"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="#00ff88" stroke-width="1"/>
+    <line x1="0" y1="400" x2="1200" y2="400" stroke="#00ff88" stroke-width="1"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="#00ff88" stroke-width="1"/>
+    <line x1="0" y1="600" x2="1200" y2="600" stroke="#00ff88" stroke-width="1"/>
+  </g>
+  
+  <!-- Terminal cursor -->
+  <text x="100" y="280" font-family="JetBrains Mono, Consolas, monospace" font-size="120" font-weight="bold" fill="url(#textGrad)">&gt;_</text>
+  
+  <!-- Main title -->
+  <text x="300" y="280" font-family="JetBrains Mono, Consolas, monospace" font-size="80" font-weight="bold">
+    <tspan fill="#ffffff">jam</tspan><tspan fill="#00ff88">code</tspan><tspan fill="#666666">.fun</tspan>
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="100" y="380" font-family="JetBrains Mono, Consolas, monospace" font-size="32" fill="#888888">
+    Build JAM Services on Polkadot
+  </text>
+  
+  <!-- Tech tags -->
+  <g transform="translate(100, 450)">
+    <rect x="0" y="0" width="100" height="36" rx="6" fill="rgba(0,255,136,0.15)" stroke="rgba(0,255,136,0.3)" stroke-width="1"/>
+    <text x="50" y="24" font-family="JetBrains Mono, monospace" font-size="16" fill="#00ff88" text-anchor="middle">Python</text>
+    
+    <rect x="120" y="0" width="60" height="36" rx="6" fill="rgba(0,200,255,0.15)" stroke="rgba(0,200,255,0.3)" stroke-width="1"/>
+    <text x="150" y="24" font-family="JetBrains Mono, monospace" font-size="16" fill="#00c8ff" text-anchor="middle">C</text>
+    
+    <rect x="200" y="0" width="80" height="36" rx="6" fill="rgba(168,85,247,0.15)" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+    <text x="240" y="24" font-family="JetBrains Mono, monospace" font-size="16" fill="#a855f7" text-anchor="middle">C++</text>
+    
+    <rect x="300" y="0" width="80" height="36" rx="6" fill="rgba(255,136,0,0.15)" stroke="rgba(255,136,0,0.3)" stroke-width="1"/>
+    <text x="340" y="24" font-family="JetBrains Mono, monospace" font-size="16" fill="#ff8800" text-anchor="middle">PVM</text>
+  </g>
+  
+  <!-- JAM badge -->
+  <g transform="translate(1000, 50)">
+    <rect x="0" y="0" width="150" height="50" rx="8" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="75" y="32" font-family="JetBrains Mono, monospace" font-size="18" fill="#888" text-anchor="middle">Polkadot JAM</text>
+  </g>
+</svg>

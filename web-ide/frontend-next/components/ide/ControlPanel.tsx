@@ -325,7 +325,7 @@ export function ControlPanel({
           >
             <option value="ws://localhost:19800">Localnet - localhost</option>
             <option value="ws://tessera-nodes-4166.eastus.azurecontainer.io:19800">
-              JAM-Preview-Mumbai-0.7.0
+              JAM-Mumbai-0.7.0
             </option>
           </select>
         </div>
@@ -518,58 +518,47 @@ export function ControlPanel({
                   </div>
                 </div>
               ) : (
-                <button
-                  onClick={onDeploy}
-                  disabled={!pvmHex || isWorking}
-                  className="w-[86%] px-3 flex items-center gap-3 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{
-                    height: "40px",
-                    backgroundColor: pvmHex
-                      ? "rgba(255, 136, 0, 0.1)"
-                      : "rgba(255, 255, 255, 0.02)",
-                    border: `1px solid ${
-                      pvmHex
-                        ? "rgba(255, 136, 0, 0.2)"
-                        : "rgba(255, 255, 255, 0.05)"
-                    }`,
-                    fontFamily: "JetBrains Mono, monospace",
-                    fontSize: "13px",
-                    color: pvmHex ? "#ff8800" : "#404040",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!e.currentTarget.disabled && pvmHex) {
-                      e.currentTarget.style.backgroundColor =
-                        "rgba(255, 136, 0, 0.15)";
-                      e.currentTarget.style.borderColor =
-                        "rgba(255, 136, 0, 0.4)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (pvmHex) {
-                      e.currentTarget.style.backgroundColor =
-                        "rgba(255, 136, 0, 0.1)";
-                      e.currentTarget.style.borderColor =
-                        "rgba(255, 136, 0, 0.2)";
-                    }
-                  }}
-                >
-                  {status === "deploying" ? (
-                    <LoadingSpinner color="#ff8800" />
-                  ) : (
-                    <Icons.deploy />
-                  )}
-                  <span>deploy()</span>
-                  <span
-                    className="ml-auto px-1.5 py-0.5 rounded"
+                <div className="relative">
+                  <button
+                    disabled={true}
+                    className="w-[86%] px-3 flex items-center gap-3 rounded-lg transition-all opacity-50 cursor-not-allowed"
                     style={{
-                      fontSize: "10px",
-                      backgroundColor: "#333",
-                      color: "#888",
+                      height: "40px",
+                      backgroundColor: "rgba(255, 136, 0, 0.05)",
+                      border: "1px solid rgba(255, 136, 0, 0.1)",
+                      fontFamily: "JetBrains Mono, monospace",
+                      fontSize: "13px",
+                      color: "#666",
                     }}
                   >
-                    ⌘D
-                  </span>
-                </button>
+                    <Icons.deploy />
+                    <span>deploy()</span>
+                    <span
+                      className="ml-auto px-1.5 py-0.5 rounded"
+                      style={{
+                        fontSize: "10px",
+                        backgroundColor: "#333",
+                        color: "#888",
+                      }}
+                    >
+                      ⌘D
+                    </span>
+                  </button>
+                  {/* Coming Soon Badge */}
+                  <div
+                    className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full"
+                    style={{
+                      backgroundColor: "rgba(255, 136, 0, 0.15)",
+                      border: "1px solid rgba(255, 136, 0, 0.3)",
+                      fontFamily: "JetBrains Mono, monospace",
+                      fontSize: "9px",
+                      color: "#ff8800",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    coming soon
+                  </div>
+                </div>
               )}
             </div>
           )}
