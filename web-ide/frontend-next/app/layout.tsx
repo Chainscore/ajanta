@@ -46,7 +46,7 @@ export const metadata: Metadata = {
       "Build JAM services on Polkadot Join-Accumulate Machine. Browser IDE for Python, C, C++ development. Compile to PVM and simulate execution.",
     images: [
       {
-        url: "/og-image.svg",
+        url: "https://jamcode.fun/og-image.svg",
         width: 1200,
         height: 630,
         alt: "JamCode.Fun - JAM Service Development IDE",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     title: "JamCode.Fun - JAM Service Development IDE",
     description:
       "Build and deploy JAM services on Polkadot. Browser-based IDE for Python, C, C++ smart contract development.",
-    images: ["/og-image.svg"],
+    images: ["https://jamcode.fun/og-image.svg"],
     creator: "@chainscore",
   },
   alternates: {
