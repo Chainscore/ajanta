@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "mypy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tsrkit-pvm"
+version = "0.1.0"
+description = "Polkadot Virtual Machine (PVM) implementation with interpreter and recompiler as specified in GP"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = "MIT"
+authors = [
+    {name = "Chainscore Labs", email = "hello@chainscore.finance"},
+]
+
+dependencies = [
+    "tsrkit-types", # Remove version constraint for workspace
+    "bitarray>=3.7.1,<4.0.0",
+    "setuptools>=80.9.0",
+    "mypy>=1.18.1",
+    "cython>=3.1.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0", 
+    "mypy>=1.0.0",
+]
+
+# Keep existing build configuration for MyPyC
+[tool.setuptools]
+packages = ["tsrkit_pvm"]
+
+# Custom build command support
+[tool.setuptools.cmdclass]
+# This allows the custom setup.py to work with uv

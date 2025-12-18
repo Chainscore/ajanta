@@ -1,0 +1,39 @@
+[package]
+name = "tsrkit-asm"
+version = "0.1.0"
+authors = ["Jan Bujak <jan@parity.io>", "Parity Technologies <admin@parity.io>", "Prasad <prasad@chainscore.finance", "Chainscore Labs <hello@chainscore.finance>"]
+license = "MIT/Apache-2.0"
+edition = "2021"
+rust-version = "1.75.0"
+repository = "https://github.com/chainscore/tsrkit-asm"
+description = "Python Bindings for Polkavm-Assembler, a Runtime assembler for PolkaVM"
+
+[lib]
+name = "tsrkit_asm"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+log = "0.4.20"
+pyo3 = { version = "0.21", optional = true, features = ["extension-module"] }
+
+[dev-dependencies]
+iced-x86 = { version = "1.20.0", features = ["code_asm"] }
+
+[features]
+default = ["alloc", "python"]
+alloc = []
+python = ["pyo3", "alloc"]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)', 'cfg(polkavm_dev_debug_zygote)'] }
+
+[lints.clippy]
+# This also triggers on cases like `.or_insert_with(Vec::new)`.
+unwrap_or_default = "allow"
+get_first = "allow"
+manual_range_contains = "allow"
+let_unit_value = "allow"
+unit_arg = "allow"
+type_complexity = "allow"
+too_many_arguments = "allow"
+needless_late_init = "allow"

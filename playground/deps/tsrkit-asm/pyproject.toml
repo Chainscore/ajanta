@@ -1,0 +1,25 @@
+[build-system]
+requires = ["maturin>=1.0", "setuptools", "wheel"]
+build-backend = "maturin"
+
+[project]
+name = "tsrkit-asm"
+version = "0.1.0"
+description = "Python Bindings for Polkavm-Assembler, a Runtime assembler for PolkaVM"
+authors = [
+    { name = "Jan Bujak", email = "jan@parity.io" },
+    { name = "Parity Technologies", email = "admin@parity.io" },
+    { name = "Prasad", email = "prasad@chainscore.finance" },
+    { name = "Chainscore Labs", email = "hello@chainscore.finance" },
+]
+license = { text = "MIT/Apache-2.0" }
+requires-python = ">=3.11"
+dependencies = []
+
+[project.urls]
+"Homepage" = "https://github.com/chainscore/tsrkit-asm"
+"Repository" = "https://github.com/chainscore/tsrkit-asm"
+
+[tool.maturin]
+python-source = "python"
+module-name = "tsrkit_asm"
