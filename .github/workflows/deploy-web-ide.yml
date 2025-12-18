@@ -27,30 +27,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Get ACR credentials
-        id: acr
-        run: |
-          ACR_LOGIN_SERVER=$(az acr show --name ${{ env.ACR_NAME }} --query loginServer --output tsv)
-          ACR_USERNAME=$(az acr credential show --name ${{ env.ACR_NAME }} --query username --output tsv)
-          ACR_PASSWORD=$(az acr credential show --name ${{ env.ACR_NAME }} --query "passwords[0].value" --output tsv)
-          echo "login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
-          echo "username=$ACR_USERNAME" >> $GITHUB_OUTPUT
-          echo "password=$ACR_PASSWORD" >> $GITHUB_OUTPUT
-
-      - name: Login to ACR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ steps.acr.outputs.login_server }}
-          username: ${{ steps.acr.outputs.username }}
-          password: ${{ steps.acr.outputs.password }}
 
       - name: Get Backend URL
         id: backend-url
@@ -62,23 +43,30 @@ jobs:
             --output tsv)
           echo "url=https://$BACKEND_URL" >> $GITHUB_OUTPUT
 
-      - name: Build and push Backend
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./web-ide/backend/Dockerfile
-          push: true
-          tags: ${{ steps.acr.outputs.login_server }}/${{ env.BACKEND_APP_NAME }}:${{ github.sha }},${{ steps.acr.outputs.login_server }}/${{ env.BACKEND_APP_NAME }}:latest
+      # Use ACR Build instead of docker/build-push-action to avoid submodule issues
+      - name: Build Backend with ACR
+        run: |
+          az acr build \
+            --registry ${{ env.ACR_NAME }} \
+            --image ${{ env.BACKEND_APP_NAME }}:${{ github.sha }} \
+            --image ${{ env.BACKEND_APP_NAME }}:latest \
+            --file web-ide/backend/Dockerfile \
+            .
 
-      - name: Build and push Frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./web-ide/frontend-next
-          file: ./web-ide/frontend-next/Dockerfile
-          push: true
-          tags: ${{ steps.acr.outputs.login_server }}/${{ env.FRONTEND_APP_NAME }}:${{ github.sha }},${{ steps.acr.outputs.login_server }}/${{ env.FRONTEND_APP_NAME }}:latest
-          build-args: |
-            NEXT_PUBLIC_API_URL=${{ steps.backend-url.outputs.url }}
+      - name: Build Frontend with ACR
+        run: |
+          az acr build \
+            --registry ${{ env.ACR_NAME }} \
+            --image ${{ env.FRONTEND_APP_NAME }}:${{ github.sha }} \
+            --image ${{ env.FRONTEND_APP_NAME }}:latest \
+            --build-arg NEXT_PUBLIC_API_URL=${{ steps.backend-url.outputs.url }} \
+            ./web-ide/frontend-next
+
+      - name: Get ACR Login Server
+        id: acr
+        run: |
+          ACR_LOGIN_SERVER=$(az acr show --name ${{ env.ACR_NAME }} --query loginServer --output tsv)
+          echo "login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
 
       - name: Update Backend Container App
         run: |
